@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OLFU Antipolo - Lost & Found</title>
+    <title>OLFU Antipolo - Lost & Found Portal</title>
     <link rel="stylesheet" href="frontend/css/styles.css">
 </head>
 <body>
@@ -13,62 +13,52 @@
         <div class="nav-container">
             <h1 class="logo">OLFU <span>Lost & Found</span></h1>
             <nav>
-                <a href="index.php" class="active">Browse Items</a>
-                <a href="report.php" class="btn-report">+ Post an Item</a>
+                <a href="report.php" class="btn-report">+ Report Item</a>
             </nav>
         </div>
     </header>
 
-    <!-- HERO SECTION & FILTERS -->
     <main class="container">
+        <!-- FILTER SECTION -->
         <section class="filter-card">
-            <h2>Campus Feed (Antipolo Campus)</h2>
-            <div class="filters">
-                <input type="text" id="searchInput" placeholder="Search item (e.g. ID, Aquaflask)...">
-                
-                <select id="statusFilter">
-                    <option value="all">All Status</option>
-                    <option value="lost">Lost Items</option>
-                    <option value="found">Found Items</option>
-                </select>
-
-                <select id="locationFilter">
-                    <option value="all">All Locations</option>
-                    <option value="Main Building">Main Building</option>
-                    <option value="St. Joseph Building">St. Joseph Building</option>
-                    <option value="Library">Library</option>
-                    <option value="Canteen">Canteen / Cafeteria</option>
-                    <option value="Gymnasium">Gymnasium</option>
-                    <option value="Guard House">Main Gate / Guard House</option>
-                </select>
-            </div>
+            <h2>Campus Belongings Feed</h2>
+            <p style="color:#666; font-size:0.9rem; margin-top:4px;">Tingnan ang mga nawawala at napulot na gamit sa Antipolo campus.</p>
         </section>
 
-        <!-- ITEMS GRID (Mock items muna habang wala pang DB) -->
+        <!-- ITEMS GRID FEED -->
         <section class="items-grid" id="itemsContainer">
-            <!-- Sample Card 1 -->
-            <article class="card">
-                <span class="badge badge-lost">LOST</span>
-                <div class="card-img-placeholder">📷 No Image Uploaded</div>
-                <div class="card-body">
-                    <h3>Navy Blue Tumbler</h3>
-                    <p class="meta">📍 Canteen • 2nd Floor Bench</p>
-                    <p class="desc">May sticker ng white cat sa takip. Naiwan around 1 PM.</p>
-                    <button class="btn-claim" onclick="openClaimModal('Navy Blue Tumbler')">Claim This Item</button>
-                </div>
-            </article>
+            <?php
+            $upload_dir = 'uploads/';
+            $images = glob($upload_dir . '*.{jpg,jpeg,png,webp,gif}', GLOB_BRACE);
 
-            <!-- Sample Card 2 -->
-            <article class="card">
-                <span class="badge badge-found">FOUND</span>
-                <div class="card-img-placeholder">📷 Image Preview</div>
-                <div class="card-body">
-                    <h3>OLFU Student ID</h3>
-                    <p class="meta">📍 Library • Reading Area</p>
-                    <p class="desc">Nasa desk kaninang umaga, turned over to Library in-charge.</p>
-                    <button class="btn-claim" onclick="openClaimModal('OLFU Student ID')">Verify / Claim</button>
+            if (!empty($images)):
+                // Ayusin para pinakabagong upload ang mauna
+                rsort($images);
+                foreach ($images as $img_path):
+                    $filename = basename($img_path);
+                    // Tanggalin ang timestamp prefix para malinis ang title
+                    $display_name = preg_replace('/^\d+_/', '', pathinfo($filename, PATHINFO_FILENAME));
+            ?>
+                <article class="item-card">
+                    <span class="badge badge-lost">Lost</span>
+                    <div class="card-img-wrapper">
+                        <img src="<?php echo htmlspecialchars($img_path); ?>" alt="<?php echo htmlspecialchars($display_name); ?>">
+                    </div>
+                    <div class="card-content">
+                        <h3><?php echo htmlspecialchars($display_name); ?></h3>
+                        <p class="location">📍 Antipolo Campus</p>
+                        <button class="btn-claim" onclick="openClaimModal('<?php echo htmlspecialchars($display_name); ?>')">Claim Item</button>
+                    </div>
+                </article>
+            <?php 
+                endforeach;
+            else: 
+            ?>
+                <div style="grid-column: 1 / -1; text-align:center; padding:3rem; background:white; border-radius:8px;">
+                    <p style="color:#888; font-size:1.1rem;">Walang naka-post na gamit sa ngayon.</p>
+                    <a href="report.php" style="color:var(--olfu-green, #005a36); font-weight:600; text-decoration:none;">Mag-report ng nawawala o napulot &rarr;</a>
                 </div>
-            </article>
+            <?php endif; ?>
         </section>
     </main>
 
@@ -78,11 +68,11 @@
             <span class="close-btn" onclick="closeClaimModal()">&times;</span>
             <h3 id="modalItemTitle">Claim Item</h3>
             <p>Mag-provide ng proof o exact description para ma-verify sa Guard House / Finder:</p>
-            <form id="claimForm">
+            <form id="claimForm" onsubmit="event.preventDefault(); alert('Claim submitted! Puntahan ang Guard House para sa verification.'); closeClaimModal();">
                 <label>Student Email:</label>
                 <input type="email" placeholder="student@fatima.edu.ph" required>
                 <label>Proof / Identifying Details:</label>
-                <textarea rows="3" placeholder="Halimbawa: May scratch sa likod, ano ang nakasulat sa loob..." required></textarea>
+                <textarea rows="3" placeholder="Halimbawa: May scratch sa ilalim, stickers, laman sa loob..." required></textarea>
                 <button type="submit" class="btn-submit">Send Claim Request</button>
             </form>
         </div>
