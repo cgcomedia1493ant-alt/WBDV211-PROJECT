@@ -81,5 +81,3 @@
     <script src="frontend/js/app.js"></script>
 </body>
 </html>
-
-// THIS IS A COMMENT LOL
