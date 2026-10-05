@@ -68,13 +68,11 @@
         form.addEventListener("submit", function(event) {
             let hasError = false;
 
-            // Get field values
             const name = document.getElementById("name");
             const email = document.getElementById("email");
             const password = document.getElementById("password");
             const confirmation = document.getElementById("password_confirmation");
 
-            // Clear previous errors
             document.querySelectorAll(".error").forEach(function(error) {
                 error.textContent = "";
             });
@@ -85,13 +83,11 @@
 
             document.getElementById("form-message").textContent = "";
 
-            // Name validation
             if (name.value.trim() === "") {
                 showError(name, "name-error", "Name is required.");
                 hasError = true;
             }
 
-            // Email validation
             if (email.value.trim() === "") {
                 showError(email, "email-error", "Email is required.");
                 hasError = true;
@@ -100,7 +96,6 @@
                 hasError = true;
             }
 
-            // Password validation
             if (password.value === "") {
                 showError(password, "password-error", "Password is required.");
                 hasError = true;
@@ -114,7 +109,6 @@
                 hasError = true;
             }
 
-            // Confirm password validation
             if (confirmation.value === "") {
                 showError(confirmation, "confirmation-error",
                     "Please confirm your password.");
@@ -125,7 +119,6 @@
                 hasError = true;
             }
 
-            // Stop form submission if there are errors
             if (hasError) {
                 event.preventDefault();
                 document.getElementById("form-message").textContent =
