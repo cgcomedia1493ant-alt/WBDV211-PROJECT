@@ -31,7 +31,7 @@
                 </select>
 
                 <label>Item Name / Title:</label>
-                <input type="text" name="item_name" placeholder="Halimbawa: Aquaflask Tumbler, Black Wallet" required>
+                <input type="text" name="item_name" placeholder="Halimbawa: Aquaflask Tumbler, Black Wallet, etc." required>
 
                 <label>Antipolo Campus Building / Spot:</label>
                 <select name="location" required>
@@ -44,7 +44,7 @@
                 </select>
 
                 <label>Specific Spot Description:</label>
-                <input type="text" name="spot_details" placeholder="Halimbawa: 3rd floor hallway bench, tapat ng Room 302">
+                <input type="text" name="spot_details" placeholder="Halimbawa: 3rd floor hallway bench, tapat ng Room 302 - SPCB">
 
                 <!-- IMAGE UPLOAD & PREVIEW BOX -->
                 <label>Upload Picture:</label>
