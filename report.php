@@ -44,7 +44,7 @@
                 </select>
 
                 <label>Specific Spot Description:</label>
-                <input type="text" name="spot_details" placeholder="Halimbawa: 3rd floor hallway bench, tapat ng Room 302 - SPCB">
+                <input type="text" name="spot_details" placeholder="Halimbawa: 3rd floor hallway bench, tapat ng Room 302 - SPCB, etc.">
 
                 <!-- IMAGE UPLOAD & PREVIEW BOX -->
                 <label>Upload Picture:</label>
