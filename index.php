@@ -1,3 +1,23 @@
+<?php
+// Start user session to verify authentication status
+session_start();
+
+// Determine whether student/staff or custodian admin is authenticated
+$is_admin = !empty($_SESSION['admin_logged_in']);
+$is_student = isset($_SESSION['user_id']) || isset($_SESSION['user_email']);
+$is_logged_in = $is_admin || $is_student;
+
+if ($is_admin) {
+    $user_display = 'Custodian';
+    $first_name = 'Custodian';
+} elseif ($is_student) {
+    $user_display = $_SESSION['user_name'] ?? 'Student';
+    $first_name = explode(' ', trim($user_display))[0];
+} else {
+    $user_display = null;
+    $first_name = '';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +35,7 @@
             --olfu-light: #e8f5e9;
             --olfu-gold: #f4c430;
             --lost-color: #d9383a;
-            --found-color: #2e7d32;
+            --found-color: #15803d;
             --bg: #f4f6f8;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
@@ -172,7 +192,7 @@
         }
 
         /* ==========================================================================
-           4. BURGER BUTTON & SLIDE-OUT SIDEBAR
+           4. BURGER BUTTON & CLEAN SIDEBAR DRAWER
            ========================================================================== */
         .burger-btn {
             background: rgba(255, 255, 255, 0.15);
@@ -215,16 +235,16 @@
             position: fixed;
             top: 0;
             right: -320px;
-            width: 300px;
+            width: 310px;
             height: 100vh;
-            background: rgba(255, 255, 255, 0.96);
+            background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
             box-shadow: -6px 0 25px rgba(0, 0, 0, 0.15);
             z-index: 2001;
             display: flex;
             flex-direction: column;
             transition: right 0.35s ease;
-            padding: 1.5rem;
+            padding: 1.6rem 1.4rem;
         }
 
         .sidebar-drawer.active {
@@ -235,9 +255,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 1rem;
+            padding-bottom: 0.9rem;
             border-bottom: 1px solid #e2e8f0;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1.1rem;
         }
 
         .sidebar-header h3 {
@@ -253,21 +273,32 @@
             line-height: 1;
         }
 
+        .sidebar-section-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            padding: 0 0.5rem;
+            margin-top: 0.6rem;
+            margin-bottom: 0.35rem;
+        }
+
         .sidebar-links {
             display: flex;
             flex-direction: column;
-            gap: 0.6rem;
+            gap: 0.45rem;
         }
 
         .sidebar-links a {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 0.75rem 1rem;
+            padding: 0.75rem 0.95rem;
             text-decoration: none;
             color: var(--text-primary);
             font-weight: 600;
-            font-size: 0.92rem;
+            font-size: 0.9rem;
             border-radius: 8px;
             transition: all 0.2s ease;
         }
@@ -276,6 +307,18 @@
             background: var(--olfu-light);
             color: var(--olfu-green);
             transform: translateX(4px);
+        }
+
+        .sidebar-admin-link {
+            background: rgba(0, 90, 54, 0.08) !important;
+            border: 1px solid rgba(0, 90, 54, 0.2) !important;
+            color: var(--olfu-green) !important;
+            font-weight: 700 !important;
+        }
+
+        .sidebar-admin-link:hover {
+            background: var(--olfu-green) !important;
+            color: #ffffff !important;
         }
 
         /* ==========================================================================
@@ -358,7 +401,7 @@
         }
 
         /* ==========================================================================
-           6. FEED CONTAINER & GRID CARDS (FIXED HORIZONTAL GRID)
+           6. FEED CONTAINER & GRID CARDS
            ========================================================================== */
         .container {
             max-width: 1140px;
@@ -385,7 +428,6 @@
             margin-top: 4px;
         }
 
-        /* Fixed multi-column horizontal display */
         .items-grid {
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
@@ -433,6 +475,18 @@
         .badge-lost {
             background: #fee2e2;
             color: var(--lost-color);
+        }
+
+        .badge-found {
+            background: #dcfce7;
+            color: var(--found-color);
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-claimed {
+            background: #dcfce7;
+            color: var(--found-color);
+            border: 1px solid #bbf7d0;
         }
 
         .card-img-wrapper {
@@ -504,9 +558,74 @@
             background: var(--olfu-hover);
         }
 
+        /* Authentication barrier locked card */
+        .auth-gate-box {
+            text-align: center;
+            padding: 3.5rem 2rem;
+            border-radius: 16px;
+            border: 2px dashed rgba(0, 90, 54, 0.35);
+            max-width: 640px;
+            margin: 1.5rem auto;
+        }
+
+        .auth-gate-title {
+            color: var(--olfu-green);
+            font-size: 1.45rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-gate-text {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.55;
+            margin-bottom: 1.8rem;
+        }
+
+        .auth-gate-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-auth-login {
+            background: var(--olfu-green);
+            color: white;
+            padding: 0.85rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(0, 90, 54, 0.2);
+            transition: background 0.2s;
+        }
+
+        .btn-auth-login:hover {
+            background: var(--olfu-hover);
+        }
+
+        .btn-auth-register {
+            background: #ffffff;
+            color: var(--olfu-green);
+            border: 2px solid var(--olfu-green);
+            padding: 0.85rem 2rem;
+            border-radius: 8px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: inline-block;
+            transition: all 0.2s ease;
+        }
+
+        .btn-auth-register:hover {
+            background: var(--olfu-light);
+        }
+
         /* ==========================================================================
            7. GREEN UNIVERSITY FOOTER
-           ========================================================================== */
+           ========================================================================= */
         .footer {
             background: #00331e;
             color: #cbd5e1;
@@ -516,24 +635,28 @@
             text-align: center;
         }
 
-        /* Modal */
+        /* ==========================================================================
+           8. MODALS STYLING
+           ========================================================================== */
         .modal {
             display: none;
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(2px);
+            backdrop-filter: blur(3px);
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 3000;
         }
 
         .modal-content {
             padding: 2.2rem;
             border-radius: 16px;
             width: 90%;
-            max-width: 460px;
+            max-width: 480px;
             position: relative;
+            background: #ffffff;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
         }
 
         .close-btn {
@@ -543,6 +666,11 @@
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
         }
     </style>
 </head>
@@ -564,10 +692,17 @@
                 </div>
             </a>
 
-            <!-- Navigation Actions & Burger Button -->
+            <!-- Navigation Actions & Greeting -->
             <div class="nav-right">
-                <a href="backend/login/login.php" class="nav-link-login">Login</a>
-                <a href="report.php" class="btn-report">+ Report Item</a>
+                <?php if ($is_logged_in): ?>
+                    <span style="color: #ffffff; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                        Hi, <?php echo htmlspecialchars($first_name); ?> <span style="font-size: 1.35rem; line-height: 1;">👋🏻</span>
+                    </span>
+                    <a href="backend/login/logout.php" class="nav-link-login" style="color: #fca5a5;">Logout</a>
+                <?php else: ?>
+                    <a href="backend/login/login.php" class="nav-link-login">Login</a>
+                <?php endif; ?>
+                <a href="<?php echo $is_logged_in ? 'report.php' : 'backend/login/login.php'; ?>" class="btn-report">+ Report Item</a>
                 <button class="burger-btn" onclick="openSidebar()" aria-label="Open Navigation Settings">
                     <span class="burger-bar"></span>
                     <span class="burger-bar"></span>
@@ -581,21 +716,23 @@
     <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
     <aside id="sidebarDrawer" class="sidebar-drawer">
         <div class="sidebar-header">
-            <h3>Portal Menu</h3>
+            <h3>MENU</h3>
             <span class="sidebar-close" onclick="closeSidebar()">&times;</span>
         </div>
+        
         <nav class="sidebar-links">
-            <a href="index.php">🏠 Home Feed</a>
-            <a href="report.php">➕ Report Missing Item</a>
-            <a href="backend/login/login.php">🔐 Student / Staff Login</a>
-            <a href="backend/login/signup.html">📝 Register Account</a>
+            <div class="sidebar-section-title">Support & Help Desk</div>
+            <a href="javascript:void(0)" onclick="openContactModal(); closeSidebar();">📞 Contact Support</a>
+            <a href="javascript:void(0)" onclick="openGuidelinesModal(); closeSidebar();">📋 Claiming Guidelines</a>
+            <a href="javascript:void(0)" onclick="openBuildingsModal(); closeSidebar();">🏢 Campus Buildings</a>
+
             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 0.6rem 0;">
-            <div style="font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 700; padding: 0 0.5rem;">Campus Info</div>
-            <a href="#itemsContainer" onclick="closeSidebar()">📍 Antipolo Buildings</a>
-            <a href="javascript:void(0)" onclick="alert('Campus Guard House is open 7:00 AM - 7:00 PM (Monday-Saturday) at the Main Sumulong Gate.');">🛡️ Guard Desk Directory</a>
+            <div class="sidebar-section-title">Staff Administration</div>
+            <a href="backend/admin/dashboard.php" class="sidebar-admin-link">🛡️ Admin Portal Login</a>
         </nav>
+
         <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; text-align: center;">
-            OLFU Antipolo Portal
+            OLFU Antipolo
         </div>
     </aside>
 
@@ -603,10 +740,10 @@
     <section class="hero-section">
         <div class="hero-content">
             <span class="hero-badge glass-badge">OFFICIAL CAMPUS RECOVERY DESK</span>
-            <h1 class="hero-title">Lost Something at OLFU Antipolo?</h1>
-            <p class="hero-subtitle">A centralized digital registry for Fatima Antipolo students and staff. Report misplaced items or claim belongings recovered across campus facilities.</p>
+            <h1 class="hero-title">Lost or Found Something at OLFU Antipolo?</h1>
+            <p class="hero-subtitle">Report misplaced items or claim belongings recovered across campus facilities.</p>
             <div class="hero-actions">
-                <a href="report.php" class="btn-hero-primary">Report Item</a>
+                <a href="<?php echo $is_logged_in ? 'report.php' : 'backend/login/login.php'; ?>" class="btn-hero-primary">Report Item</a>
                 <a href="#itemsContainer" class="btn-hero-secondary">Browse Belongings Feed</a>
             </div>
         </div>
@@ -618,7 +755,7 @@
             <div class="glass-panel" style="flex: 1; padding: 1.2rem 1.4rem; border-radius: 14px; border-top: 4px solid var(--olfu-green) !important;">
                 <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">🔎</div>
                 <h3 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">1. Search the Feed</h3>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">Check live updates with building tags (JSB, Vicente Santos, San Lorenzo Hall).</p>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">Check live updates with facility location tags across campus grounds.</p>
             </div>
             <div class="glass-panel" style="flex: 1; padding: 1.2rem 1.4rem; border-radius: 14px; border-top: 4px solid var(--olfu-gold) !important;">
                 <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">📝</div>
@@ -634,85 +771,174 @@
     </section>
 
     <!-- MAIN FEED CONTAINER -->
-    <main class="container">
+    <main class="container" id="itemsContainer">
         <!-- HEADER / FILTER BANNER -->
         <section class="glass-panel filter-card">
             <h2>Campus Belongings Feed</h2>
-            <p>Real-time lost and found updates across OLFU Antipolo buildings.</p>
+            <p>Real-time lost and found updates across OLFU Antipolo.</p>
         </section>
 
-        <!-- ITEMS GRID FEED (HORIZONTAL ROW DISPLAY) -->
-        <section class="items-grid" id="itemsContainer">
-            <?php
-            $upload_dir = 'uploads/';
-            $images = glob($upload_dir . '*.{jpg,jpeg,png,webp,gif}', GLOB_BRACE);
+        <?php if ($is_logged_in): ?>
+            <!-- ITEMS GRID FEED (AUTHENTICATED ONLY) -->
+            <section class="items-grid">
+                <?php
+                // Load persistent data from admin JSON
+                $data_file = __DIR__ . '/backend/admin/item_data.json';
+                $items_data = file_exists($data_file) ? json_decode(file_get_contents($data_file), true) : [];
 
-            if (!empty($images)):
-                rsort($images);
-                foreach ($images as $img_path):
-                    $filename = basename($img_path);
-                    $display_name = preg_replace('/^\d+_/', '', pathinfo($filename, PATHINFO_FILENAME));
+                $upload_dir = 'uploads/';
+                // Exclude GIF format
+                $images = glob($upload_dir . '*.{jpg,jpeg,png,webp}', GLOB_BRACE);
+
+                if (!empty($images)):
+                    rsort($images);
                     $sample_buildings = [
-                        'Vicente Santos Bldg',
+                        'Vicente M. Santos Bldg (VMS)',
                         'Juliet Santos Bldg (JSB)',
-                        'St. Catherine Hall',
-                        'San Lorenzo Hall'
+                        'San Juan Bautista Hall (SJBH)',
+                        'St. Catherine Hall (SCH)',
+                        'San Pedro Calungsod Bldg (SPCB)',
+                        'Athletics & Gym Center',
                     ];
-                    $assigned_building = $sample_buildings[crc32($filename) % count($sample_buildings)];
-            ?>
-                <!-- SINGLE ITEM CARD -->
-                <article class="glass-panel item-card">
-                    <span class="badge badge-lost">LOST</span>
-                    <div class="card-img-wrapper">
-                        <img src="<?php echo htmlspecialchars($img_path); ?>" alt="<?php echo htmlspecialchars($display_name); ?>">
-                    </div>
-                    <div class="card-content">
-                        <h3><?php echo htmlspecialchars($display_name); ?></h3>
-                        <div class="location-badge">
-                            <span class="pin-icon">📍</span>
-                            <span class="building-name"><?php echo htmlspecialchars($assigned_building); ?></span>
+
+                    foreach ($images as $img_path):
+                        $filename     = basename($img_path);
+                        $display_name = preg_replace('/^\d+_/', '', pathinfo($filename, PATHINFO_FILENAME));
+                        $display_name = ucwords(str_replace('_', ' ', $display_name));
+
+                        // Kunin ang eksaktong location mula sa JSON; kung wala pa, gamitin ang existing building array
+                        $assigned_location = $items_data[$filename]['location'] ?? $sample_buildings[crc32($filename) % count($sample_buildings)];
+                        $custody_status    = $items_data[$filename]['status'] ?? 'IN CUSTODY';
+                        $report_type       = $items_data[$filename]['report_type'] ?? 'LOST';
+                        $is_claimed        = ($custody_status === 'CLAIMED');
+
+                        // Set correct badge text and style
+                        if ($is_claimed) {
+                            $badge_text  = 'CLAIMED';
+                            $badge_class = 'badge-claimed';
+                        } else {
+                            $badge_text  = ($report_type === 'FOUND') ? 'FOUND' : 'LOST';
+                            $badge_class = ($report_type === 'FOUND') ? 'badge-found' : 'badge-lost';
+                        }
+                ?>
+                    <!-- SINGLE ITEM CARD -->
+                    <article class="glass-panel item-card">
+                        <span class="badge <?php echo $badge_class; ?>">
+                            <?php echo $badge_text; ?>
+                        </span>
+                        <div class="card-img-wrapper">
+                            <img src="<?php echo htmlspecialchars($img_path); ?>" alt="<?php echo htmlspecialchars($display_name); ?>">
                         </div>
-                        <button class="btn-claim" onclick="openClaimModal('<?php echo htmlspecialchars($display_name); ?>')">Claim Item</button>
+                        <div class="card-content">
+                            <h3><?php echo htmlspecialchars($display_name); ?></h3>
+                            <div class="location-badge">
+                                <span class="pin-icon">📍</span>
+                                <span class="building-name"><?php echo htmlspecialchars($assigned_location); ?></span>
+                            </div>
+                            <button class="btn-claim" onclick="openClaimModal('<?php echo htmlspecialchars($display_name, ENT_QUOTES); ?>')">
+                                <?php echo $is_claimed ? 'Claimed (View Details)' : 'Claim Item'; ?>
+                            </button>
+                        </div>
+                    </article>
+                <?php 
+                    endforeach;
+                else: 
+                ?>
+                    <div class="glass-panel" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1.5rem; border-radius: 14px; border: 2px dashed #cbd5e1;">
+                        <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 0.5rem;">No lost or found items reported at the moment.</p>
+                        <a href="report.php" style="color: var(--olfu-green); font-weight: 700; text-decoration: none;">Report an item now &rarr;</a>
                     </div>
-                </article>
-            <?php 
-                endforeach;
-            else: 
-            ?>
-                <div class="glass-panel" style="grid-column: 1 / -1; text-align: center; padding: 4rem 1.5rem; border-radius: 14px; border: 2px dashed #cbd5e1;">
-                    <p style="color: #64748b; font-size: 1.1rem; margin-bottom: 0.5rem;">No lost or found items reported at the moment.</p>
-                    <a href="report.php" style="color: var(--olfu-green); font-weight: 700; text-decoration: none;">Report an item now &rarr;</a>
+                <?php endif; ?>
+            </section>
+        <?php else: ?>
+            <!-- AUTHENTICATION GATEWAY PROMPT (WHEN LOGGED OUT) -->
+            <section class="glass-panel auth-gate-box">
+                <div style="font-size: 3rem; margin-bottom: 0.8rem;">🔒</div>
+                <h3 class="auth-gate-title">OLFU Account Required</h3>
+                <p class="auth-gate-text">To view detailed photos of lost items, inspect campus locations, and file recovery claims, please sign in using your official Our Lady of Fatima University account.</p>
+                <div class="auth-gate-actions">
+                    <a href="backend/login/login.php" class="btn-auth-login">Sign In with OLFU Account</a>
+                    <a href="backend/login/signup.php" class="btn-auth-register">Register Account</a>
                 </div>
-            <?php endif; ?>
-        </section>
+            </section>
+        <?php endif; ?>
     </main>
 
     <!-- GREEN CAMPUS FOOTER -->
     <footer class="footer">
         <div style="max-width: 1140px; margin: auto;">
             <p style="font-weight: 700; color: #ffffff; margin-bottom: 0.4rem;">Our Lady of Fatima University - Antipolo Campus</p>
-            <p style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 1.2rem;">Km 26 Sumulong Hwy, Antipolo, Rizal • Campus Security & Lost and Found Unit</p>
+            <p style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 1.2rem;">Km 26 Sumulong Hwy, Antipolo, Rizal • Campus Security & Lost and Found</p>
             <p style="font-size: 0.8rem; color: #64748b;">&copy; <?php echo date('Y'); ?> OLFU Antipolo Lost & Found Portal. All rights reserved.</p>
         </div>
     </footer>
 
-    <!-- CLAIM MODAL POPUP -->
+    <!-- 1. CLAIM MODAL POPUP -->
     <div id="claimModal" class="modal">
         <div class="glass-panel modal-content">
             <span class="close-btn" onclick="closeClaimModal()">&times;</span>
-            <h3 id="modalItemTitle">Claim Item</h3>
-            <p style="font-size: 0.9rem; color: #64748b; margin-top: 0.4rem;">Please provide verifiable identifying details to present to Campus Security / Finder:</p>
+            <h3 id="modalItemTitle" style="color: var(--olfu-green); font-size: 1.3rem;">Claim Item</h3>
+            <p style="font-size: 0.88rem; color: #64748b; margin-top: 0.4rem;">Please provide verifiable identifying details to present to Campus Security / Finder:</p>
             <form id="claimForm" onsubmit="event.preventDefault(); alert('Claim submitted! Proceed to the Campus Guard House for verification.'); closeClaimModal();" style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem;">
-                <label style="font-size: 0.85rem; font-weight: 600;">Student Email:</label>
-                <input type="email" placeholder="student@fatima.edu.ph" required style="padding: 0.7rem; border: 1px solid #d1d5db; border-radius: 6px;">
-                <label style="font-size: 0.85rem; font-weight: 600;">Proof / Distinct Details:</label>
-                <textarea rows="3" placeholder="Specify marks, stickers, inner contents, or proof of ownership..." required style="padding: 0.7rem; border: 1px solid #d1d5db; border-radius: 6px;"></textarea>
+                <label style="font-size: 0.82rem; font-weight: 700;">Student Email:</label>
+                <input type="email" placeholder="student@fatima.edu.ph" required style="padding: 0.7rem; border: 1.5px solid #d1d5db; border-radius: 8px;">
+                <label style="font-size: 0.82rem; font-weight: 700;">Proof / Distinct Details:</label>
+                <textarea rows="3" placeholder="Specify marks, stickers, inner contents, or proof of ownership..." required style="padding: 0.7rem; border: 1.5px solid #d1d5db; border-radius: 8px;"></textarea>
                 <button type="submit" style="padding: 0.8rem; background: var(--olfu-green); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 0.5rem;">Submit Claim Request</button>
             </form>
         </div>
     </div>
 
-    <!-- JAVASCRIPT: SIDEBAR TOGGLE -->
+    <!-- 2. CONTACT US MODAL -->
+    <div id="contactModal" class="modal">
+        <div class="glass-panel modal-content">
+            <span class="close-btn" onclick="closeContactModal()">&times;</span>
+            <h3 style="color: var(--olfu-green); font-size: 1.3rem; margin-bottom: 0.6rem;">📞 Campus Help Desk</h3>
+            <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5; margin-bottom: 1.2rem;">For immediate concerns regarding lost valuables (wallets, laptops, phones), reach out directly to campus units:</p>
+            <div style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.88rem;">
+                <div style="background: var(--olfu-light); padding: 0.8rem; border-radius: 8px;">
+                    <strong>🛡️ Main Guard Desk (Sumulong Gate):</strong><br>
+                    Mon - Sat: 7:00 AM – 7:00 PM<br>
+                    Location: Main Gate 1 Security Counter
+                </div>
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.8rem; border-radius: 8px;">
+                    <strong>🏛️ Office of Student Affairs (OSA):</strong><br>
+                    Email: <span style="color: var(--olfu-green); font-weight: 600;">osa.antipolo@fatima.edu.ph</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. GUIDELINES MODAL -->
+    <div id="guidelinesModal" class="modal">
+        <div class="glass-panel modal-content">
+            <span class="close-btn" onclick="closeGuidelinesModal()">&times;</span>
+            <h3 style="color: var(--olfu-green); font-size: 1.3rem; margin-bottom: 0.6rem;">📋 Claiming Guidelines</h3>
+            <ul style="padding-left: 1.2rem; font-size: 0.88rem; color: #475569; display: flex; flex-direction: column; gap: 0.6rem; line-height: 1.5;">
+                <li><strong>Valid ID Required:</strong> Always present your official OLFU Student ID or Faculty RFID card.</li>
+                <li><strong>Proof of Ownership:</strong> Be ready to unlock electronic devices or identify unique marks (stickers, case scratches, inside items).</li>
+                <li><strong>Turnover Period:</strong> Unclaimed items are securely logged and stored at the Security Desk for 60 days before institutional review.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 4. CAMPUS BUILDINGS MODAL -->
+    <div id="buildingsModal" class="modal">
+        <div class="glass-panel modal-content">
+            <span class="close-btn" onclick="closeBuildingsModal()">&times;</span>
+            <h3 style="color: var(--olfu-green); font-size: 1.3rem; margin-bottom: 0.6rem;">🏢 Antipolo Campus Buildings</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.85rem; color: #334155;">
+                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>VMS:</strong> Vicente M. Santos Bldg</div>
+                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>JSB:</strong> Juliet Santos Bldg</div>
+                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SJBH:</strong> San Juan Bautista Hall</div>
+                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SCH:</strong> St. Catherine Hall</div>
+                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SPCB:</strong> San Pedro Calungsod Bldg</div>
+                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>ATH:</strong> Athletics & Gym Center</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT: DRAWER & MODAL TOGGLES -->
     <script>
         function openSidebar() {
             document.getElementById('sidebarDrawer').classList.add('active');
@@ -724,13 +950,37 @@
             document.getElementById('sidebarOverlay').classList.remove('active');
         }
 
+        /* Claim Modal */
         function openClaimModal(itemName) {
             document.getElementById('modalItemTitle').innerText = 'Claim Item: ' + itemName;
             document.getElementById('claimModal').style.display = 'flex';
         }
-
         function closeClaimModal() {
             document.getElementById('claimModal').style.display = 'none';
+        }
+
+        /* Support / Contact Modal */
+        function openContactModal() {
+            document.getElementById('contactModal').style.display = 'flex';
+        }
+        function closeContactModal() {
+            document.getElementById('contactModal').style.display = 'none';
+        }
+
+        /* Guidelines Modal */
+        function openGuidelinesModal() {
+            document.getElementById('guidelinesModal').style.display = 'flex';
+        }
+        function closeGuidelinesModal() {
+            document.getElementById('guidelinesModal').style.display = 'none';
+        }
+
+        /* Buildings Modal */
+        function openBuildingsModal() {
+            document.getElementById('buildingsModal').style.display = 'flex';
+        }
+        function closeBuildingsModal() {
+            document.getElementById('buildingsModal').style.display = 'none';
         }
     </script>
 </body>
