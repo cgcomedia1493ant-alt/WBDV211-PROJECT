@@ -1,16 +1,16 @@
 <?php
-// Start staff session
+
 session_start();
 
 $error_message = '';
 
-// Handle staff authentication
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $staff_account = strtolower(trim($_POST['username'] ?? ''));
     $staff_pass    = trim($_POST['password'] ?? '');
 
     if (!empty($staff_account) && !empty($staff_pass)) {
-        // Accepted authorized institutional roles
+        
         $valid_accounts = [
             'custodian', 
             'security', 
@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'desk@fatima.edu.ph'
         ];
 
-        // Flexible credential authentication
+        
         if (in_array($staff_account, $valid_accounts) && ($staff_pass === 'fatima123' || $staff_pass === 'admin123')) {
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_user'] = 'Campus Custodian Desk';

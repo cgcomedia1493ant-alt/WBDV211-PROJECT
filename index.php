@@ -835,7 +835,7 @@ if ($is_admin) {
                                 <span class="pin-icon">📍</span>
                                 <span class="building-name"><?php echo htmlspecialchars($assigned_location); ?></span>
                             </div>
-                            <button class="btn-claim" onclick="openClaimModal('<?php echo htmlspecialchars($display_name, ENT_QUOTES); ?>')">
+                            <button class="btn-claim" onclick="window.location.href='backend/claim_item.php?item=<?php echo urlencode($display_name); ?>'">
                                 <?php echo $is_claimed ? 'Claimed (View Details)' : 'Claim Item'; ?>
                             </button>
                         </div>
@@ -872,22 +872,6 @@ if ($is_admin) {
             <p style="font-size: 0.8rem; color: #64748b;">&copy; <?php echo date('Y'); ?> OLFU Antipolo Lost & Found Portal. All rights reserved.</p>
         </div>
     </footer>
-
-    <!-- 1. CLAIM MODAL POPUP -->
-    <div id="claimModal" class="modal">
-        <div class="glass-panel modal-content">
-            <span class="close-btn" onclick="closeClaimModal()">&times;</span>
-            <h3 id="modalItemTitle" style="color: var(--olfu-green); font-size: 1.3rem;">Claim Item</h3>
-            <p style="font-size: 0.88rem; color: #64748b; margin-top: 0.4rem;">Please provide verifiable identifying details to present to Campus Security / Finder:</p>
-            <form id="claimForm" onsubmit="event.preventDefault(); alert('Claim submitted! Proceed to the Campus Guard House for verification.'); closeClaimModal();" style="display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem;">
-                <label style="font-size: 0.82rem; font-weight: 700;">Student Email:</label>
-                <input type="email" placeholder="student@fatima.edu.ph" required style="padding: 0.7rem; border: 1.5px solid #d1d5db; border-radius: 8px;">
-                <label style="font-size: 0.82rem; font-weight: 700;">Proof / Distinct Details:</label>
-                <textarea rows="3" placeholder="Specify marks, stickers, inner contents, or proof of ownership..." required style="padding: 0.7rem; border: 1.5px solid #d1d5db; border-radius: 8px;"></textarea>
-                <button type="submit" style="padding: 0.8rem; background: var(--olfu-green); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 0.5rem;">Submit Claim Request</button>
-            </form>
-        </div>
-    </div>
 
     <!-- 2. CONTACT US MODAL -->
     <div id="contactModal" class="modal">
@@ -948,15 +932,6 @@ if ($is_admin) {
         function closeSidebar() {
             document.getElementById('sidebarDrawer').classList.remove('active');
             document.getElementById('sidebarOverlay').classList.remove('active');
-        }
-
-        /* Claim Modal */
-        function openClaimModal(itemName) {
-            document.getElementById('modalItemTitle').innerText = 'Claim Item: ' + itemName;
-            document.getElementById('claimModal').style.display = 'flex';
-        }
-        function closeClaimModal() {
-            document.getElementById('claimModal').style.display = 'none';
         }
 
         /* Support / Contact Modal */

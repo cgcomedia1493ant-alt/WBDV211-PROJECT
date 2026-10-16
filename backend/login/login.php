@@ -2,6 +2,9 @@
 // Start user session to handle authentication
 session_start();
 
+// Connect to MySQL database
+require_once __DIR__ . '/database.php';
+
 $error_message = '';
 
 // Handle login submission
@@ -16,14 +19,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Generic security notice without exposing domain pattern specifics
         $error_message = 'Invalid institutional credentials. Please try again.';
     } else {
-        // Successful authentication
-        $_SESSION['user_id'] = 1;
-        $_SESSION['user_email'] = $email;
-        $_SESSION['user_name'] = strstr($email, '@', true) ?: 'Student';
+        // Query user record securely from database
+        $stmt = $conn->prepare("SELECT id, fullname, email, password FROM users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-        // Redirect back to main feed
-        header("Location: ../../index.php");
-        exit();
+        if ($user = $result->fetch_assoc()) {
+            // Verify encrypted password hash
+            if (password_verify($password, $user['password'])) {
+                // Populate session data for the portal
+                $_SESSION['user_id'] = $user['id'];
+                $_SESSION['user_email'] = $user['email'];
+                $_SESSION['user_name'] = !empty($user['fullname']) ? $user['fullname'] : (strstr($user['email'], '@', true) ?: 'Student');
+
+                $stmt->close();
+
+                // Redirect back to main feed
+                header("Location: ../../index.php");
+                exit();
+            } else {
+                $error_message = 'Incorrect password. Please try again.';
+            }
+        } else {
+            $error_message = 'No registered institutional account found with this email.';
+        }
+        $stmt->close();
     }
 }
 ?>

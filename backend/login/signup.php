@@ -2,6 +2,9 @@
 // Start user session
 session_start();
 
+// Connect to MySQL database
+require_once __DIR__ . '/database.php';
+
 $error_message = '';
 $success_message = '';
 
@@ -21,14 +24,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Enforce institutional domain constraint
         $error_message = 'Invalid institutional credentials. Please try again.';
     } else {
-        // Authentication success
-        $_SESSION['user_id'] = 1;
-        $_SESSION['user_email'] = $email;
-        $_SESSION['user_name'] = $full_name;
+        // Verify if institutional account is already registered
+        $check_stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $check_stmt->bind_param("s", $email);
+        $check_stmt->execute();
+        $check_stmt->store_result();
 
-        // Redirect back to portal feed
-        header("Location: ../../index.php");
-        exit();
+        if ($check_stmt->num_rows > 0) {
+            $error_message = 'This institutional account is already registered. Please sign in.';
+        } else {
+            // Hash password securely
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+            // Insert new user record into database
+            $insert_stmt = $conn->prepare("INSERT INTO users (fullname, email, password) VALUES (?, ?, ?)");
+            $insert_stmt->bind_param("sss", $full_name, $email, $hashed_password);
+
+            if ($insert_stmt->execute()) {
+                // Populate session data for immediate sign-in
+                $_SESSION['user_id'] = $insert_stmt->insert_id;
+                $_SESSION['user_email'] = $email;
+                $_SESSION['user_name'] = $full_name;
+
+                $insert_stmt->close();
+                $check_stmt->close();
+
+                // Redirect back to portal feed
+                header("Location: ../../index.php");
+                exit();
+            } else {
+                $error_message = 'Registration failed. Please check database connectivity.';
+            }
+            $insert_stmt->close();
+        }
+        $check_stmt->close();
     }
 }
 ?>
@@ -195,7 +224,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
 
         <div class="login-footer-links">
-            Already registered? <a href="login.php" style="color: var(--olfu-green); font-weight: 700;">Sign in here</a> • <a href="../../index.php">&larr; Return to Home Feed</a>
+            Already registered? <a href="login.php" style="color: var(--olfu-green); font-weight: 700;">Sign in here</a>
+            <br style="margin-bottom: 0.5rem;">
+            <a href="../../index.php" style="margin-top: 0.4rem;">&larr; Return to Home Feed</a>
         </div>
     </main>
 

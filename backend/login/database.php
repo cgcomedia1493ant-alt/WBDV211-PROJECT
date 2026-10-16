@@ -1,17 +1,12 @@
 <?php
-
 $host = "localhost";
-$dbname= "login_system";
-$username = "root";
-$password = "";
+$user = "root";
+$pass = "";
+$dbname = "olfu_lost_found";
 
-$mysqli = new mysqli(hostname: $host,
-                     username: $username,
-                     password: $password,
-                     database: $dbname);
+$conn = new mysqli($host, $user, $pass, $dbname);
 
-if ($mysqli->connect_errno) {
-    die("Connect error: " .$mysqli->connect_error); 
+if ($conn->connect_error) {
+    die("Database connection failed: " . $conn->connect_error);
 }
-
-return $mysqli;
+?>
