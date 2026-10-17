@@ -10,7 +10,7 @@ if (!$is_authenticated) {
     exit();
 }
 
-// Connect to MySQL database (katabi lang ang login/database.php)
+// Connect to MySQL database 
 require_once __DIR__ . '/login/database.php';
 
 $message = '';
@@ -303,16 +303,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Header Navigation -->
     <header class="navbar">
         <div class="nav-container">
-            <a href="../../index.php" class="brand-link">
+            <a href="../index.php" class="brand-link">
                 <div class="logo-circle">
-                    <img src="../../frontend/assets/images/OLFU LOGO.png" alt="OLFU Seal">
+                    <img src="../frontend/assets/images/OLFU LOGO.png" alt="OLFU Seal">
                 </div>
                 <div>
                     <div class="brand-title">OLFU ANTIPOLO</div>
                     <div class="brand-campus">Lost & Found Portal</div>
                 </div>
             </a>
-            <a href="../../index.php" class="btn-back">&larr; Return to Home Feed</a>
+            <a href="../index.php" class="btn-back">&larr; Return to Home Feed</a>
         </div>
     </header>
 

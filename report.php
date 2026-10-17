@@ -441,7 +441,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <option value="" disabled selected>Select Building / Area</option>
                             <option value="Vicente M. Santos Bldg (VMS)">Vicente M. Santos Bldg (VMS)</option>
                             <option value="Juliet Santos Bldg (JSB)">Juliet Santos Bldg (JSB)</option>
-                            <option value="San Juan Bautista Hall (SJBH)">San Juan Bautista Hall (SJBH)</option>
+                            <option value="St. John the Baptist Hall (SJBH)">St. John the Baptist Hall (SJBH)</option>
                             <option value="St. Catherine Hall (SCH)">St. Catherine Hall (SCH)</option>
                             <option value="San Pedro Calungsod Bldg (SPCB)">San Pedro Calungsod Bldg (SPCB)</option>
                             <option value="Athletics & Gym Center">Athletics & Gym Center</option>
@@ -452,12 +452,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div class="form-group">
-                        <label for="location_detail">Specific Facility / Floor</label>
+                        <label for="location_detail">Specific Room / Floor</label>
                         <input 
                             type="text" 
                             id="location_detail" 
                             name="location_detail" 
-                            placeholder="e.g. 3rd Floor Hallway, Room 304, Sa gilid ng upuan..." 
+                            placeholder="e.g. 3rd Floor Hallway, Room 304..." 
                             required>
                     </div>
                 </div>

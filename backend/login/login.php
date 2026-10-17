@@ -79,13 +79,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form class="login-form" method="POST" action="">
             <div class="form-group">
-                <label>Institutional Account</label>
+                <label>FATIMA Account</label>
                 <div class="input-wrapper">
                     <span class="input-icon">👤</span>
                     <input 
                         type="email" 
                         name="email" 
-                        placeholder="Institutional Account" 
+                        placeholder="FATIMA Email" 
                         autocomplete="username"
                         required>
                 </div>

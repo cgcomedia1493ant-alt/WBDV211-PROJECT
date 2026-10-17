@@ -755,7 +755,7 @@ if ($is_admin) {
             <div class="glass-panel" style="flex: 1; padding: 1.2rem 1.4rem; border-radius: 14px; border-top: 4px solid var(--olfu-green) !important;">
                 <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">🔎</div>
                 <h3 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">1. Search the Feed</h3>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">Check live updates with facility location tags across campus grounds.</p>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">Check updates with facility location tags across campus grounds.</p>
             </div>
             <div class="glass-panel" style="flex: 1; padding: 1.2rem 1.4rem; border-radius: 14px; border-top: 4px solid var(--olfu-gold) !important;">
                 <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">📝</div>
@@ -795,7 +795,7 @@ if ($is_admin) {
                     $sample_buildings = [
                         'Vicente M. Santos Bldg (VMS)',
                         'Juliet Santos Bldg (JSB)',
-                        'San Juan Bautista Hall (SJBH)',
+                        'St. John the Baptist Hall (SJBH)',
                         'St. Catherine Hall (SCH)',
                         'San Pedro Calungsod Bldg (SPCB)',
                         'Athletics & Gym Center',
@@ -914,7 +914,7 @@ if ($is_admin) {
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.85rem; color: #334155;">
                 <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>VMS:</strong> Vicente M. Santos Bldg</div>
                 <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>JSB:</strong> Juliet Santos Bldg</div>
-                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SJBH:</strong> San Juan Bautista Hall</div>
+                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SJBH:</strong> St. John the Baptist Hall</div>
                 <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SCH:</strong> St. Catherine Hall</div>
                 <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SPCB:</strong> San Pedro Calungsod Bldg</div>
                 <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>ATH:</strong> Athletics & Gym Center</div>

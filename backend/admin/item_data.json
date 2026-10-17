@@ -7,5 +7,10 @@
     },
     "1789569049_wallet.jpg": {
         "status": "IN CUSTODY"
+    },
+    "1792134705_Phone.jpg": {
+        "status": "CLAIMED",
+        "report_type": "LOST",
+        "location": "Athletics & Gym Center (Stage)"
     }
 }

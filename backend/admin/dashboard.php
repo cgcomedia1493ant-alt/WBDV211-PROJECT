@@ -17,13 +17,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
     exit();
 }
 
+// Connect to database to read and manage claims
+require_once __DIR__ . '/../login/database.php';
+
 $upload_dir = realpath(__DIR__ . '/../../uploads');
 $data_file  = __DIR__ . '/item_data.json';
 
 // Load persistent item database (status and exact location)
 $items_data = file_exists($data_file) ? json_decode(file_get_contents($data_file), true) : [];
 
-// Handle Background AJAX Status Toggle (Prevents Page Scroll/Jump)
+// Handle Background AJAX Status Toggle for Belongings Inventory
 if (isset($_POST['ajax_toggle'])) {
     $target_file = basename($_POST['filename'] ?? '');
     $current_status = $items_data[$target_file]['status'] ?? 'IN CUSTODY';
@@ -51,6 +54,69 @@ if (isset($_POST['ajax_toggle'])) {
         'claimed'    => $claimed,
         'badge_id'   => md5($target_file)
     ]);
+    exit();
+}
+
+// Handle AJAX Status Toggle for Claims (PENDING <-> APPROVED) & Auto-sync Inventory
+if (isset($_POST['ajax_claim_status'])) {
+    $claim_id = intval($_POST['claim_id'] ?? 0);
+    $status_stmt = $conn->prepare("SELECT item_name, claim_status FROM claims WHERE id = ?");
+    $status_stmt->bind_param("i", $claim_id);
+    $status_stmt->execute();
+    $curr = $status_stmt->get_result()->fetch_assoc();
+    $status_stmt->close();
+
+    if ($curr) {
+        $updated_status = ($curr['claim_status'] === 'APPROVED') ? 'PENDING' : 'APPROVED';
+        $update_stmt = $conn->prepare("UPDATE claims SET claim_status = ? WHERE id = ?");
+        $update_stmt->bind_param("si", $updated_status, $claim_id);
+        $update_stmt->execute();
+        $update_stmt->close();
+
+        // I-sync sa Inventory (item_data.json)
+        $target_item_name = strtolower(trim($curr['item_name']));
+        $inventory_status = ($updated_status === 'APPROVED') ? 'CLAIMED' : 'IN CUSTODY';
+
+        foreach ($items_data as $filename => &$item_meta) {
+            $clean_name = preg_replace('/^\d+_/', '', pathinfo($filename, PATHINFO_FILENAME));
+            $clean_name = strtolower(str_replace('_', ' ', $clean_name));
+            if ($clean_name === $target_item_name) {
+                $item_meta['status'] = $inventory_status;
+            }
+        }
+        unset($item_meta);
+        file_put_contents($data_file, json_encode($items_data, JSON_PRETTY_PRINT));
+
+        // Kuwentahin ang bagong metrics
+        $total = count(glob($upload_dir . DIRECTORY_SEPARATOR . '*.{jpg,jpeg,png,webp,gif}', GLOB_BRACE));
+        $claimed = 0;
+        foreach ($items_data as $record) {
+            if (($record['status'] ?? '') === 'CLAIMED') $claimed++;
+        }
+        $in_custody = $total - $claimed;
+
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success'    => true,
+            'new_status' => $updated_status,
+            'in_custody' => $in_custody,
+            'claimed'    => $claimed
+        ]);
+        exit();
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false]);
+    exit();
+}
+
+// Handle Claim Deletion
+if (isset($_GET['delete_claim'])) {
+    $del_id = intval($_GET['delete_claim']);
+    $del_stmt = $conn->prepare("DELETE FROM claims WHERE id = ?");
+    $del_stmt->bind_param("i", $del_id);
+    $del_stmt->execute();
+    $del_stmt->close();
+    header("Location: dashboard.php?view=claims");
     exit();
 }
 
@@ -122,6 +188,16 @@ foreach ($images as $img) {
     }
 }
 $in_custody_count = $total_items - $claimed_count;
+
+// Fetch all claims from MySQL database
+$claims_list = [];
+$claims_result = $conn->query("SELECT * FROM claims ORDER BY submitted_at DESC");
+if ($claims_result) {
+    while ($row = $claims_result->fetch_assoc()) {
+        $claims_list[] = $row;
+    }
+}
+$total_claims = count($claims_list);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -268,6 +344,36 @@ $in_custody_count = $total_items - $claimed_count;
             transform: translateY(-1px);
         }
 
+        .btn-claims-view {
+            color: #004428;
+            background: var(--olfu-gold);
+            border: none;
+            padding: 0.55rem 1.1rem;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .btn-claims-view:hover {
+            transform: translateY(-1px);
+            background: #eab308;
+        }
+
+        .counter-badge {
+            background: #dc2626;
+            color: #ffffff;
+            font-size: 0.72rem;
+            padding: 2px 7px;
+            border-radius: 12px;
+            font-weight: 800;
+        }
+
         .btn-logout {
             color: #fee2e2;
             text-decoration: none;
@@ -368,12 +474,13 @@ $in_custody_count = $total_items - $claimed_count;
             margin-top: 0.4rem;
         }
 
-        /* 1. Inventory Table View */
+        /* Tables View */
         .table-card {
             background: #ffffff;
             border-radius: 14px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
             overflow: hidden;
+            margin-bottom: 2rem;
         }
 
         .table-header {
@@ -456,6 +563,12 @@ $in_custody_count = $total_items - $claimed_count;
             background: #dcfce7;
             color: #15803d;
             border: 1px solid #bbf7d0;
+        }
+
+        .badge-pending {
+            background: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
         }
 
         .btn-delete {
@@ -670,7 +783,7 @@ $in_custody_count = $total_items - $claimed_count;
 </head>
 <body>
 
-    <!-- NAVBAR WITH VIEW SWITCHER BUTTON BEFORE LOGOUT -->
+    <!-- NAVBAR WITH VIEW SWITCHER AND CLAIM REQUESTS BUTTON -->
     <header class="navbar">
         <div class="nav-container">
             <a href="dashboard.php" class="brand-link">
@@ -686,6 +799,9 @@ $in_custody_count = $total_items - $claimed_count;
                 </div>
             </a>
             <div class="nav-right">
+                <button type="button" class="btn-claims-view" onclick="showClaimsView()">
+                    📩 Claim Requests <span class="counter-badge"><?php echo $total_claims; ?></span>
+                </button>
                 <button type="button" class="btn-view-toggle" id="btnViewToggle" onclick="toggleDashboardView()">
                     👁️ Student Feed View
                 </button>
@@ -699,7 +815,7 @@ $in_custody_count = $total_items - $claimed_count;
         <section class="welcome-box">
             <div class="welcome-text">
                 <h1 id="welcomeTitle">Campus Custodian & Security Console</h1>
-                <p id="welcomeDesc">Manage inventory records, toggle claim handovers, and delete unneeded items.</p>
+                <p id="welcomeDesc">Manage inventory records, review incoming claim requests, and toggle handovers.</p>
             </div>
             <button class="btn-open-modal" onclick="openRegisterModal()">+ Register New Item</button>
         </section>
@@ -717,6 +833,10 @@ $in_custody_count = $total_items - $claimed_count;
             <div class="metric-card" style="border-top-color: #10b981;">
                 <span class="metric-label">Claimed & Returned</span>
                 <div class="metric-value" style="color: #10b981;" id="metricClaimed"><?php echo $claimed_count; ?></div>
+            </div>
+            <div class="metric-card" style="border-top-color: #ef4444;">
+                <span class="metric-label">Student Claim Requests</span>
+                <div class="metric-value" style="color: #dc2626;"><?php echo $total_claims; ?></div>
             </div>
         </section>
 
@@ -751,7 +871,6 @@ $in_custody_count = $total_items - $claimed_count;
                             $fname = basename($img);
                             $clean_title = preg_replace('/^\d+_/', '', pathinfo($fname, PATHINFO_FILENAME));
                             
-                            // Retrieve saved location from JSON, or fallback safely
                             $display_location = $items_data[$fname]['location'] ?? $default_spots[crc32($fname) % count($default_spots)];
                             $current_status   = $items_data[$fname]['status'] ?? 'IN CUSTODY';
                             $is_claimed       = ($current_status === 'CLAIMED');
@@ -768,7 +887,7 @@ $in_custody_count = $total_items - $claimed_count;
                                 </td>
                                 <td>
                                     <button 
-                                        type="button"
+                                        type="button" 
                                         class="status-badge <?php echo $is_claimed ? 'badge-claimed' : 'badge-custody'; ?>"
                                         onclick="toggleItemStatus('<?php echo htmlspecialchars($fname, ENT_QUOTES); ?>', this)">
                                         <?php echo $is_claimed ? '✓ CLAIMED' : '⏳ IN CUSTODY'; ?>
@@ -792,7 +911,73 @@ $in_custody_count = $total_items - $claimed_count;
             <?php endif; ?>
         </section>
 
-        <!-- 2. Public Student Feed Cards View -->
+        <!-- 2. Student Claim Requests Table View -->
+        <section class="table-card" id="viewClaims" style="display: none; border-top: 4px solid var(--olfu-gold);">
+            <div class="table-header">
+                <h2>Student Claim Requests (Database Feed)</h2>
+                <button type="button" class="btn-open-modal" style="padding: 0.45rem 1rem; font-size: 0.82rem;" onclick="showInventoryView()">
+                    &larr; Back to Inventory
+                </button>
+            </div>
+
+            <?php if (!empty($claims_list)): ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Student Email</th>
+                            <th>Proof / Distinct Details</th>
+                            <th>Submitted Date</th>
+                            <th>Status</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($claims_list as $claim): 
+                            $is_approved = ($claim['claim_status'] === 'APPROVED');
+                        ?>
+                            <tr>
+                                <td style="font-weight: 700; color: var(--olfu-green);">
+                                    📦 <?php echo htmlspecialchars($claim['item_name']); ?>
+                                </td>
+                                <td>
+                                    <a href="mailto:<?php echo htmlspecialchars($claim['student_email']); ?>" style="color: #2563eb; text-decoration: none; font-weight: 600;">
+                                        <?php echo htmlspecialchars($claim['student_email']); ?>
+                                    </a>
+                                </td>
+                                <td style="max-width: 320px; line-height: 1.4; color: #334155;">
+                                    <?php echo nl2br(htmlspecialchars($claim['proof_details'])); ?>
+                                </td>
+                                <td style="color: var(--text-secondary); font-size: 0.85rem;">
+                                    <?php echo date('M d, Y - h:i A', strtotime($claim['submitted_at'])); ?>
+                                </td>
+                                <td>
+                                    <button 
+                                        type="button" 
+                                        class="status-badge <?php echo $is_approved ? 'badge-claimed' : 'badge-pending'; ?>"
+                                        onclick="toggleClaimStatus(<?php echo $claim['id']; ?>, this)">
+                                        <?php echo $is_approved ? '✓ APPROVED' : '⏳ PENDING'; ?>
+                                    </button>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a href="dashboard.php?delete_claim=<?php echo $claim['id']; ?>" 
+                                       class="btn-delete" 
+                                       onclick="return confirm('Are you sure you want to remove this claim record?');">
+                                        Remove
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <div style="padding: 3.5rem; text-align: center; color: var(--text-secondary);">
+                    <p>No student claim requests submitted yet.</p>
+                </div>
+            <?php endif; ?>
+        </section>
+
+        <!-- 3. Public Student Feed Cards View -->
         <section class="preview-section" id="viewPreview">
             <div class="preview-header">
                 <h2>Public Student Feed View</h2>
@@ -882,26 +1067,44 @@ $in_custody_count = $total_items - $claimed_count;
         Our Lady of Fatima University &bull; Antipolo Campus Security & Facilities Custody Management
     </footer>
 
-    <!-- View Switcher, Dynamic Custom Location, & Instant Status Toggling -->
+    <!-- View Switchers & Instant AJAX Toggling -->
     <script>
-        let isFeedView = false;
+        let currentView = 'claims'; // Default to claims view if already viewing requests
 
         function toggleDashboardView() {
             const tableView = document.getElementById('viewTable');
             const previewView = document.getElementById('viewPreview');
+            const claimsView = document.getElementById('viewClaims');
             const toggleBtn = document.getElementById('btnViewToggle');
 
-            isFeedView = !isFeedView;
-
-            if (isFeedView) {
+            if (currentView === 'table' || currentView === 'claims') {
                 tableView.style.display = 'none';
+                claimsView.style.display = 'none';
                 previewView.style.display = 'block';
                 toggleBtn.innerHTML = '📋 Inventory Table';
+                currentView = 'preview';
             } else {
-                tableView.style.display = 'block';
                 previewView.style.display = 'none';
+                claimsView.style.display = 'none';
+                tableView.style.display = 'block';
                 toggleBtn.innerHTML = '👁️ Student Feed View';
+                currentView = 'table';
             }
+        }
+
+        function showClaimsView() {
+            document.getElementById('viewTable').style.display = 'none';
+            document.getElementById('viewPreview').style.display = 'none';
+            document.getElementById('viewClaims').style.display = 'block';
+            document.getElementById('btnViewToggle').innerHTML = '👁️ Student Feed View';
+            currentView = 'claims';
+        }
+
+        function showInventoryView() {
+            document.getElementById('viewClaims').style.display = 'none';
+            document.getElementById('viewPreview').style.display = 'none';
+            document.getElementById('viewTable').style.display = 'block';
+            currentView = 'table';
         }
 
         function toggleAdminCustomBuilding(val) {
@@ -938,7 +1141,6 @@ $in_custody_count = $total_items - $claimed_count;
                         btnElement.innerHTML = '⏳ IN CUSTODY';
                     }
 
-                    // Update live feed badge below in real-time
                     const previewBadge = document.getElementById('tag-' + data.badge_id);
                     if (previewBadge) {
                         if (data.new_status === 'CLAIMED') {
@@ -950,7 +1152,6 @@ $in_custody_count = $total_items - $claimed_count;
                         }
                     }
 
-                    // Update metrics numbers
                     document.getElementById('metricInCustody').innerText = data.in_custody;
                     document.getElementById('metricClaimed').innerText = data.claimed;
                 }
@@ -958,11 +1159,49 @@ $in_custody_count = $total_items - $claimed_count;
             .catch(err => console.error('Status toggle failed:', err));
         }
 
+        function toggleClaimStatus(claimId, btnElement) {
+            const formData = new FormData();
+            formData.append('ajax_claim_status', '1');
+            formData.append('claim_id', claimId);
+
+            fetch('dashboard.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.new_status === 'APPROVED') {
+                        btnElement.className = 'status-badge badge-claimed';
+                        btnElement.innerHTML = '✓ APPROVED';
+                    } else {
+                        btnElement.className = 'status-badge badge-pending';
+                        btnElement.innerHTML = '⏳ PENDING';
+                    }
+
+                    // Awtomatikong i-update ang metrics sa itaas
+                    if (data.in_custody !== undefined) {
+                        document.getElementById('metricInCustody').innerText = data.in_custody;
+                    }
+                    if (data.claimed !== undefined) {
+                        document.getElementById('metricClaimed').innerText = data.claimed;
+                    }
+                }
+            })
+            .catch(err => console.error('Claim toggle failed:', err));
+        }
+
         function openRegisterModal() {
             document.getElementById('registerModal').style.display = 'flex';
         }
         function closeRegisterModal() {
             document.getElementById('registerModal').style.display = 'none';
+        }
+
+        // Auto-open claims tab if directed by URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('view') === 'claims') {
+            showClaimsView();
         }
     </script>
 </body>
