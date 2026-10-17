@@ -17,15 +17,19 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-body {
+html, body {
+    overflow-x: hidden;
+    width: 100%;
     min-height: 100vh;
+}
+
+body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem;
+    padding: 1.25rem 1rem;
     background: linear-gradient(135deg, #004d2e 0%, #002617 100%);
     position: relative;
-    overflow: hidden;
 }
 
 /* ==========================================================================
@@ -42,20 +46,20 @@ body {
 }
 
 .orb-1 {
-    width: 420px;
-    height: 420px;
+    width: 320px;
+    height: 320px;
     background: rgba(0, 110, 66, 0.5);
-    top: -120px;
-    left: -100px;
+    top: -100px;
+    left: -80px;
     animation-duration: 16s;
 }
 
 .orb-2 {
-    width: 360px;
-    height: 360px;
+    width: 280px;
+    height: 280px;
     background: rgba(244, 196, 48, 0.22);
-    bottom: -90px;
-    right: -80px;
+    bottom: -80px;
+    right: -60px;
     animation-duration: 12s;
 }
 
@@ -64,10 +68,10 @@ body {
         transform: translate(0, 0) scale(1);
     }
     50% {
-        transform: translate(40px, 35px) scale(1.08);
+        transform: translate(30px, 25px) scale(1.08);
     }
     100% {
-        transform: translate(-30px, 20px) scale(0.95);
+        transform: translate(-20px, 15px) scale(0.95);
     }
 }
 
@@ -81,10 +85,10 @@ body {
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.85);
-    border-radius: 22px;
-    padding: 2.8rem 2.2rem;
+    border-radius: 20px;
+    padding: 2.2rem 1.5rem;
     width: 100%;
-    max-width: 420px;
+    max-width: 410px;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35),
                 0 0 0 1px rgba(255, 255, 255, 0.45) inset;
     text-align: center;
@@ -118,11 +122,11 @@ body {
    4. EMBLEM & PULSING GLOW ANIMATION
    ========================================================================== */
 .logo-badge {
-    width: 68px;
-    height: 68px;
+    width: 60px;
+    height: 60px;
     background: #ffffff;
     border-radius: 50%;
-    margin: 0 auto 1.1rem;
+    margin: 0 auto 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,8 +136,8 @@ body {
 }
 
 .logo-badge img {
-    width: 52px;
-    height: 52px;
+    width: 46px;
+    height: 46px;
     object-fit: contain;
 }
 
@@ -148,7 +152,7 @@ body {
 
 .login-title {
     color: var(--olfu-green);
-    font-size: 1.55rem;
+    font-size: 1.4rem;
     font-weight: 800;
     letter-spacing: -0.3px;
     margin-bottom: 0.25rem;
@@ -156,9 +160,9 @@ body {
 
 .login-sub {
     color: var(--text-muted);
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     font-weight: 500;
-    margin-bottom: 1.8rem;
+    margin-bottom: 1.5rem;
 }
 
 /* ==========================================================================
@@ -168,11 +172,11 @@ body {
     background: #fef2f2;
     border: 1px solid #fecaca;
     color: #b91c1c;
-    padding: 0.75rem 1rem;
+    padding: 0.7rem 0.85rem;
     border-radius: 10px;
-    font-size: 0.84rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    margin-bottom: 1.4rem;
+    margin-bottom: 1.2rem;
     text-align: center;
     animation: shakeError 0.4s ease-in-out;
 }
@@ -186,22 +190,22 @@ body {
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 1.2rem;
+    gap: 1rem;
     text-align: left;
 }
 
 .form-group {
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
+    gap: 0.4rem;
 }
 
 .form-group label {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 700;
     color: #334155;
     text-transform: uppercase;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.5px;
 }
 
 .input-wrapper {
@@ -213,7 +217,7 @@ body {
 .input-icon {
     position: absolute;
     left: 14px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: #94a3b8;
     pointer-events: none;
     transition: color 0.2s ease, transform 0.2s ease;
@@ -221,10 +225,10 @@ body {
 
 .form-group input {
     width: 100%;
-    padding: 0.82rem 1rem 0.82rem 2.65rem;
+    padding: 0.78rem 0.85rem 0.78rem 2.5rem;
     border: 1.5px solid #cbd5e1;
     border-radius: 10px;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     color: var(--text-main);
     outline: none;
     background: #ffffff;
@@ -249,17 +253,18 @@ body {
     position: relative;
     background: linear-gradient(135deg, var(--olfu-green) 0%, var(--olfu-dark) 100%);
     color: #ffffff;
-    padding: 0.9rem;
+    padding: 0.85rem;
     border: none;
     border-radius: 10px;
-    font-size: 0.96rem;
+    font-size: 0.92rem;
     font-weight: 800;
     letter-spacing: 0.3px;
     cursor: pointer;
-    margin-top: 0.4rem;
+    margin-top: 0.3rem;
     overflow: hidden;
     box-shadow: 0 4px 14px rgba(0, 90, 54, 0.28);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
 }
 
 .btn-signin::before {
@@ -291,8 +296,8 @@ body {
    7. FOOTER REDIRECT LINK
    ========================================================================== */
 .login-footer-links {
-    margin-top: 1.6rem;
-    font-size: 0.82rem;
+    margin-top: 1.4rem;
+    font-size: 0.8rem;
 }
 
 .login-footer-links a {
@@ -308,4 +313,19 @@ body {
 .login-footer-links a:hover {
     color: var(--olfu-green);
     transform: translateX(-3px);
+}
+
+@media screen and (max-width: 480px) {
+    .login-card {
+        padding: 1.8rem 1.2rem;
+        border-radius: 16px;
+    }
+
+    .login-title {
+        font-size: 1.25rem;
+    }
+
+    .login-sub {
+        font-size: 0.78rem;
+    }
 }

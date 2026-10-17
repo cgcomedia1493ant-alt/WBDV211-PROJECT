@@ -25,7 +25,9 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
-body {
+html, body {
+    overflow-x: hidden;
+    width: 100%;
     background-color: var(--bg);
     color: var(--text-primary);
     min-height: 100vh;
@@ -60,46 +62,50 @@ body {
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(244, 196, 48, 0.35);
-    padding: 0.85rem 0;
+    padding: 0.75rem 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
     position: sticky;
     top: 0;
     z-index: 1000;
+    width: 100%;
 }
 
 .nav-container {
     max-width: 1140px;
     margin: auto;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 0.5rem;
 }
 
 .brand-link {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
     text-decoration: none;
+    min-width: 0;
+    flex-shrink: 1;
 }
 
 .logo-circle {
-    width: 62px;
-    height: 62px;
+    width: 48px;
+    height: 48px;
     background: #ffffff;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-    border: 2.5px solid var(--olfu-gold);
+    border: 2px solid var(--olfu-gold);
     overflow: hidden;
     flex-shrink: 0;
 }
 
 .brand-logo {
-    width: 52px;
-    height: 52px;
+    width: 38px;
+    height: 38px;
     object-fit: contain;
 }
 
@@ -108,54 +114,71 @@ body {
     flex-direction: column;
     justify-content: center;
     gap: 2px;
+    min-width: 0;
 }
 
 .brand-header-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 6px;
 }
 
 .brand-title {
-    font-size: 2.2rem;
+    font-size: 1.5rem;
     font-weight: 900;
-    letter-spacing: 2px;
+    letter-spacing: 1.2px;
     color: #ffffff;
     line-height: 1;
 }
 
 .brand-campus {
-    font-size: 0.9rem;
+    font-size: 0.72rem;
     font-weight: 800;
-    letter-spacing: 1.5px;
+    letter-spacing: 0.8px;
     color: var(--olfu-gold);
     text-transform: uppercase;
     border-left: 2px solid rgba(255, 255, 255, 0.3);
-    padding-left: 10px;
+    padding-left: 6px;
+    white-space: nowrap;
 }
 
 .brand-portal {
-    font-size: 0.95rem;
+    font-size: 0.78rem;
     font-weight: 500;
     color: var(--olfu-light);
     opacity: 0.95;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .nav-right {
     display: flex;
     align-items: center;
-    gap: 1.2rem;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.user-greeting {
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
 }
 
 .nav-link-login {
     color: #ffffff;
     text-decoration: none;
     font-weight: 700;
-    font-size: 0.95rem;
-    padding: 0.5rem 0.8rem;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.5rem;
     border-radius: 6px;
     transition: opacity 0.2s;
+    white-space: nowrap;
 }
 
 .nav-link-login:hover {
@@ -165,14 +188,15 @@ body {
 .btn-report {
     background: #ffffff;
     color: var(--olfu-green);
-    padding: 0.65rem 1.4rem;
+    padding: 0.5rem 0.85rem;
     text-decoration: none;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     transition: all 0.2s ease;
     display: inline-block;
+    white-space: nowrap;
 }
 
 .btn-report:hover {
@@ -183,18 +207,18 @@ body {
 
 /* ==========================================================================
    5. BURGER BUTTON & SLIDE-OUT SIDEBAR DRAWER
-   Off-canvas drawer for quick links and campus settings.
    ========================================================================== */
 .burger-btn {
     background: rgba(255, 255, 255, 0.12);
     border: 1.5px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     cursor: pointer;
-    padding: 8px 10px;
+    padding: 6px 8px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .burger-btn:hover {
@@ -203,7 +227,7 @@ body {
 }
 
 .burger-bar {
-    width: 20px;
+    width: 18px;
     height: 2px;
     background-color: #ffffff;
     border-radius: 2px;
@@ -229,7 +253,8 @@ body {
     position: fixed;
     top: 0;
     right: -320px;
-    width: 300px;
+    width: 290px;
+    max-width: 85vw;
     height: 100vh;
     background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(16px);
@@ -315,14 +340,14 @@ body {
 
 /* ==========================================================================
    6. HERO / LANDING BANNER
-   Eye-catching university header banner.
    ========================================================================== */
 .hero-section {
     background: linear-gradient(135deg, rgba(0, 90, 54, 0.94) 0%, rgba(0, 68, 40, 0.96) 100%);
     color: #ffffff;
-    padding: 4.5rem 1.5rem 4rem;
+    padding: 3.5rem 1.25rem 3rem;
     text-align: center;
     border-bottom: 4px solid var(--olfu-gold);
+    width: 100%;
 }
 
 .hero-content {
@@ -332,27 +357,27 @@ body {
 
 .hero-badge {
     display: inline-block;
-    padding: 6px 16px;
+    padding: 5px 14px;
     border-radius: 20px;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 1.2rem;
+    letter-spacing: 0.8px;
+    margin-bottom: 1rem;
 }
 
 .hero-title {
-    font-size: 2.6rem;
+    font-size: 2.1rem;
     font-weight: 900;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
     letter-spacing: -0.5px;
-    line-height: 1.2;
+    line-height: 1.25;
 }
 
 .hero-subtitle {
-    font-size: 1.08rem;
+    font-size: 0.95rem;
     opacity: 0.92;
-    margin-bottom: 2.2rem;
-    line-height: 1.6;
+    margin-bottom: 1.8rem;
+    line-height: 1.55;
     max-width: 680px;
     margin-left: auto;
     margin-right: auto;
@@ -361,18 +386,18 @@ body {
 .hero-actions {
     display: flex;
     justify-content: center;
-    gap: 1rem;
+    gap: 0.85rem;
     flex-wrap: wrap;
 }
 
 .btn-hero-primary {
     background: var(--olfu-gold);
     color: #004428;
-    padding: 0.9rem 2rem;
+    padding: 0.8rem 1.8rem;
     border-radius: 8px;
     text-decoration: none;
     font-weight: 800;
-    font-size: 0.98rem;
+    font-size: 0.92rem;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s;
 }
@@ -385,11 +410,11 @@ body {
     background: rgba(255, 255, 255, 0.12);
     color: #ffffff;
     border: 1.5px solid rgba(255, 255, 255, 0.4);
-    padding: 0.9rem 2rem;
+    padding: 0.8rem 1.8rem;
     border-radius: 8px;
     text-decoration: none;
     font-weight: 700;
-    font-size: 0.98rem;
+    font-size: 0.92rem;
     backdrop-filter: blur(4px);
     transition: background 0.2s;
 }
@@ -400,29 +425,23 @@ body {
 
 /* ==========================================================================
    7. 3-STEP PROCESS CARDS
-   Quick visual guide for students.
    ========================================================================== */
 .steps-container {
     max-width: 1140px;
-    margin: -2.2rem auto 2.5rem;
+    margin: -2rem auto 2.2rem;
     padding: 0 1.25rem;
     position: relative;
     z-index: 10;
 }
 
 .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); 
-        }
-
-        @media (max-width: 768px) {
-            .steps-grid {
-                grid-template-columns: 1fr; 
-            }
-        }
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1.25rem;
+}
 
 .step-card {
-    padding: 1.4rem 1.5rem;
+    padding: 1.2rem 1.3rem;
     border-radius: 14px;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -441,25 +460,24 @@ body {
 }
 
 .step-icon {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     margin-bottom: 0.4rem;
 }
 
 .step-title {
-    font-size: 1.05rem;
+    font-size: 0.98rem;
     color: var(--text-primary);
     margin-bottom: 0.3rem;
 }
 
 .step-desc {
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     color: var(--text-secondary);
-    line-height: 1.5;
+    line-height: 1.45;
 }
 
 /* ==========================================================================
    8. FEED SECTION & ITEM CARDS
-   List of active lost and found items.
    ========================================================================== */
 .container {
     max-width: 1140px;
@@ -468,28 +486,28 @@ body {
 }
 
 .filter-card {
-    padding: 1.5rem 1.8rem;
+    padding: 1.4rem 1.6rem;
     border-radius: 14px;
     border-left: 5px solid var(--olfu-green);
-    margin-bottom: 2rem;
+    margin-bottom: 1.8rem;
 }
 
 .filter-card h2 {
     color: var(--olfu-green);
-    font-size: 1.45rem;
+    font-size: 1.35rem;
     font-weight: 800;
 }
 
 .filter-card p {
     color: var(--text-secondary);
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     margin-top: 4px;
 }
 
 .items-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.75rem;
+    gap: 1.5rem;
 }
 
 .item-card {
@@ -508,11 +526,11 @@ body {
 
 .badge {
     position: absolute;
-    top: 14px;
-    left: 14px;
-    padding: 5px 12px;
+    top: 12px;
+    left: 12px;
+    padding: 4px 10px;
     border-radius: 20px;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 800;
     letter-spacing: 0.8px;
     z-index: 2;
@@ -531,13 +549,13 @@ body {
 
 .card-img-wrapper {
     width: 100%;
-    height: 230px;
+    height: 200px;
     background: rgba(248, 250, 252, 0.7);
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1rem;
+    padding: 0.85rem;
     border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 
@@ -552,15 +570,15 @@ body {
 }
 
 .card-content {
-    padding: 1.3rem;
+    padding: 1.1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
     flex-grow: 1;
 }
 
 .card-content h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--text-primary);
     font-weight: 700;
     margin: 0;
@@ -570,57 +588,34 @@ body {
 .location-badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.82rem;
+    gap: 5px;
+    font-size: 0.8rem;
     font-weight: 600;
     color: var(--olfu-green);
     background-color: var(--olfu-light);
-    padding: 5px 12px;
+    padding: 4px 10px;
     border-radius: 20px;
     width: fit-content;
-    margin: 4px 0 10px 0;
+    margin: 2px 0 8px 0;
     border: 1px solid rgba(0, 90, 54, 0.15);
-}
-
-.pin-icon {
-    font-size: 0.85rem;
 }
 
 .btn-claim {
     margin-top: auto;
-    padding: 0.75rem;
+    padding: 0.7rem;
     background: var(--olfu-green);
     color: #ffffff;
     border: none;
     border-radius: 8px;
     font-weight: 700;
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     cursor: pointer;
     transition: background 0.2s ease;
+    width: 100%;
 }
 
 .btn-claim:hover {
     background: var(--olfu-hover);
-}
-
-.empty-state {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 4rem 1.5rem;
-    border-radius: 14px;
-    border: 2px dashed #cbd5e1;
-}
-
-.empty-state p {
-    color: var(--text-secondary);
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
-}
-
-.empty-state a {
-    color: var(--olfu-green);
-    font-weight: 700;
-    text-decoration: none;
 }
 
 /* ==========================================================================
@@ -629,10 +624,11 @@ body {
 .footer {
     background: #00331e;
     color: #cbd5e1;
-    padding: 2.5rem 1.5rem;
-    margin-top: 4rem;
+    padding: 2rem 1.25rem;
+    margin-top: 3rem;
     border-top: 4px solid var(--olfu-green);
     text-align: center;
+    width: 100%;
 }
 
 .footer-container {
@@ -647,13 +643,13 @@ body {
 }
 
 .footer-desc {
-    font-size: 0.88rem;
+    font-size: 0.85rem;
     color: #94a3b8;
-    margin-bottom: 1.2rem;
+    margin-bottom: 1rem;
 }
 
 .footer-copy {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: #64748b;
 }
 
@@ -669,14 +665,16 @@ body {
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    padding: 1rem;
 }
 
 .modal-content {
-    padding: 2.2rem;
+    padding: 1.8rem 1.4rem;
     border-radius: 16px;
-    width: 90%;
+    width: 100%;
     max-width: 460px;
     position: relative;
+    background: #ffffff;
 }
 
 .close-btn {
@@ -692,47 +690,51 @@ body {
     color: #000;
 }
 
-.modal-content form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.9rem;
-    margin-top: 1.2rem;
-}
+/* ==========================================================================
+   11. MEDIA QUERIES FOR MOBILE BREAKPOINTS
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+    .nav-container {
+        padding: 0 0.5rem;
+    }
 
-.modal-content label {
-    font-size: 0.86rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: -0.3rem;
-}
+    .user-greeting {
+        font-size: 0.78rem;
+    }
 
-.modal-content input,
-.modal-content textarea {
-    padding: 0.75rem;
-    border: 1.5px solid #d1d5db;
-    border-radius: 8px;
-    outline: none;
-    font-size: 0.92rem;
-}
+    .btn-report {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.78rem;
+    }
 
-.modal-content input:focus,
-.modal-content textarea:focus {
-    border-color: var(--olfu-green);
-}
+    .nav-link-login {
+        padding: 0.3rem 0.4rem;
+        font-size: 0.78rem;
+    }
 
-.btn-submit {
-    padding: 0.85rem;
-    background: var(--olfu-green);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: background 0.2s;
-}
+    .steps-grid {
+        grid-template-columns: 1fr; 
+    }
 
-.btn-submit:hover {
-    background: var(--olfu-hover);
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-hero-primary, .btn-hero-secondary {
+        width: 100%;
+        text-align: center;
+    }
+
+    .items-grid {
+        grid-template-columns: 1fr;
+    }
 }

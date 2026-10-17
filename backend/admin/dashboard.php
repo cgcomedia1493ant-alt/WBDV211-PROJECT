@@ -73,7 +73,7 @@ if (isset($_POST['ajax_claim_status'])) {
         $update_stmt->execute();
         $update_stmt->close();
 
-        // I-sync sa Inventory (item_data.json)
+        // Sync with Inventory (item_data.json)
         $target_item_name = strtolower(trim($curr['item_name']));
         $inventory_status = ($updated_status === 'APPROVED') ? 'CLAIMED' : 'IN CUSTODY';
 
@@ -87,7 +87,7 @@ if (isset($_POST['ajax_claim_status'])) {
         unset($item_meta);
         file_put_contents($data_file, json_encode($items_data, JSON_PRETTY_PRINT));
 
-        // Kuwentahin ang bagong metrics
+        // Recalculate metrics
         $total = count(glob($upload_dir . DIRECTORY_SEPARATOR . '*.{jpg,jpeg,png,webp,gif}', GLOB_BRACE));
         $claimed = 0;
         foreach ($items_data as $record) {
@@ -206,6 +206,9 @@ $total_claims = count($claims_list);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custodian Console - OLFU Antipolo</title>
     <style>
+        /* ==========================================================================
+           1. CSS VARIABLES & THEME CONFIGURATION
+           ========================================================================== */
         :root {
             --olfu-green: #005a36;
             --olfu-hover: #004428;
@@ -218,6 +221,9 @@ $total_claims = count($claims_list);
             --text-secondary: #64748b;
         }
 
+        /* ==========================================================================
+           2. GLOBAL RESETS
+           ========================================================================== */
         * {
             margin: 0;
             padding: 0;
@@ -233,49 +239,57 @@ $total_claims = count($claims_list);
             flex-direction: column;
         }
 
-        /* Top Navigation */
+        /* ==========================================================================
+           3. FIXED TOP NAVIGATION BAR
+           Uses position: fixed so header stays pinned at top during scroll
+           ========================================================================== */
         .navbar {
-            background: linear-gradient(135deg, rgba(0, 90, 54, 0.96) 0%, rgba(0, 68, 40, 0.98) 100%);
+            background: linear-gradient(135deg, rgba(0, 90, 54, 0.98) 0%, rgba(0, 68, 40, 0.99) 100%);
             padding: 0.85rem 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            position: sticky;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
+            width: 100%;
         }
 
         .nav-container {
             max-width: 1200px;
             margin: auto;
-            padding: 0 1.5rem;
+            padding: 0 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 0.5rem;
         }
 
         .brand-link {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             text-decoration: none;
+            min-width: 0;
         }
 
         .logo-circle {
-            width: 58px;
-            height: 58px;
+            width: 44px;
+            height: 44px;
             background: #ffffff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-            border: 2.5px solid var(--olfu-gold);
+            border: 2px solid var(--olfu-gold);
             overflow: hidden;
             flex-shrink: 0;
         }
 
         .brand-logo {
-            width: 48px;
-            height: 48px;
+            width: 34px;
+            height: 34px;
             object-fit: contain;
         }
 
@@ -284,129 +298,225 @@ $total_claims = count($claims_list);
             flex-direction: column;
             justify-content: center;
             gap: 2px;
+            min-width: 0;
         }
 
         .brand-header-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         .brand-title {
-            font-size: 2rem;
+            font-size: 1.35rem;
             font-weight: 900;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             color: #ffffff;
             line-height: 1;
+            white-space: nowrap;
         }
 
         .brand-campus {
-            font-size: 0.85rem;
+            font-size: 0.72rem;
             font-weight: 800;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             color: var(--olfu-gold);
             text-transform: uppercase;
             border-left: 2px solid rgba(255,255,255,0.3);
-            padding-left: 10px;
+            padding-left: 8px;
+            white-space: nowrap;
         }
 
         .brand-portal {
-            font-size: 0.88rem;
+            font-size: 0.78rem;
             font-weight: 500;
             color: var(--olfu-light);
             opacity: 0.95;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .nav-right {
+        /* ==========================================================================
+           4. SIDEBAR DRAWER & OVERLAY
+           ========================================================================== */
+        .nav-right-actions {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.6rem;
+            flex-shrink: 0;
         }
 
-        .btn-view-toggle {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.16);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            padding: 0.55rem 1.05rem;
+        .burger-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
             border-radius: 8px;
-            font-size: 0.88rem;
-            font-weight: 700;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            padding: 7px 9px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
             transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
-        .btn-view-toggle:hover {
-            background: rgba(255, 255, 255, 0.26);
-            transform: translateY(-1px);
+        .burger-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
         }
 
-        .btn-claims-view {
-            color: #004428;
-            background: var(--olfu-gold);
-            border: none;
-            padding: 0.55rem 1.1rem;
-            border-radius: 8px;
-            font-size: 0.88rem;
+        .burger-bar {
+            width: 18px;
+            height: 2px;
+            background-color: #ffffff;
+            border-radius: 2px;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: none;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        .sidebar-drawer {
+            position: fixed;
+            top: 0;
+            right: -320px;
+            width: 290px;
+            max-width: 85vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            box-shadow: -6px 0 25px rgba(0, 0, 0, 0.15);
+            z-index: 2001;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.35s ease;
+            padding: 1.5rem 1.25rem;
+        }
+
+        .sidebar-drawer.active {
+            right: 0;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 0.9rem;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1.1rem;
+        }
+
+        .sidebar-header h3 {
+            color: var(--olfu-green);
+            font-size: 1.15rem;
             font-weight: 800;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
         }
 
-        .btn-claims-view:hover {
-            transform: translateY(-1px);
-            background: #eab308;
+        .sidebar-close {
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            line-height: 1;
+        }
+
+        .sidebar-section-title {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            padding: 0 0.5rem;
+            margin-top: 0.6rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .sidebar-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+
+        .sidebar-links a, .sidebar-links button {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0.95rem;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: left;
+        }
+
+        .sidebar-links a:hover, .sidebar-links button:hover {
+            background: var(--olfu-light);
+            color: var(--olfu-green);
+            transform: translateX(4px);
+        }
+
+        .sidebar-claims-btn {
+            background: rgba(244, 196, 48, 0.15) !important;
+            border: 1px solid var(--olfu-gold) !important;
+            color: #004428 !important;
+            font-weight: 700 !important;
+        }
+
+        .sidebar-logout-link {
+            background: #fef2f2 !important;
+            border: 1px solid #fecaca !important;
+            color: #b91c1c !important;
+            font-weight: 700 !important;
+        }
+
+        .sidebar-logout-link:hover {
+            background: #ef4444 !important;
+            color: #ffffff !important;
         }
 
         .counter-badge {
             background: #dc2626;
             color: #ffffff;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             padding: 2px 7px;
             border-radius: 12px;
             font-weight: 800;
         }
 
-        .btn-logout {
-            color: #fee2e2;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 700;
-            background: rgba(239, 68, 68, 0.2);
-            padding: 0.55rem 1.1rem;
-            border-radius: 8px;
-            border: 1px solid rgba(239, 68, 68, 0.4);
-            transition: all 0.2s ease;
-        }
-
-        .btn-logout:hover {
-            background: #ef4444;
-            color: #ffffff;
-        }
-
-        /* Main Workspace Container */
+        /* ==========================================================================
+           5. MAIN DASHBOARD WORKSPACE CONTAINER
+           Includes top margin to clear space below fixed navbar
+           ========================================================================== */
         .dash-container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1.5rem;
+            margin: 5.5rem auto 1.5rem;
+            padding: 0 1rem;
             width: 100%;
             flex-grow: 1;
         }
 
         .welcome-box {
             background: #ffffff;
-            padding: 1.6rem 2rem;
+            padding: 1.25rem 1.5rem;
             border-radius: 14px;
             border-left: 5px solid var(--olfu-gold);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -415,52 +525,55 @@ $total_claims = count($claims_list);
         }
 
         .welcome-text h1 {
-            font-size: 1.45rem;
+            font-size: 1.25rem;
             color: var(--olfu-green);
             font-weight: 800;
         }
 
         .welcome-text p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-top: 4px;
         }
 
         .btn-open-modal {
             background: var(--olfu-green);
             color: #ffffff;
-            padding: 0.75rem 1.4rem;
+            padding: 0.65rem 1.2rem;
             border-radius: 8px;
             border: none;
             cursor: pointer;
             font-weight: 800;
-            font-size: 0.92rem;
+            font-size: 0.85rem;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .btn-open-modal:hover {
             background: var(--olfu-hover);
-            transform: translateY(-1px);
         }
 
+        /* ==========================================================================
+           6. METRIC CARDS GRID
+           ========================================================================== */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.25rem;
-            margin-bottom: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
         }
 
         .metric-card {
             background: #ffffff;
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-radius: 14px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
             border-top: 4px solid var(--olfu-green);
         }
 
         .metric-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
             color: var(--text-secondary);
@@ -468,31 +581,35 @@ $total_claims = count($claims_list);
         }
 
         .metric-value {
-            font-size: 2.1rem;
+            font-size: 1.8rem;
             font-weight: 900;
             color: var(--olfu-green);
-            margin-top: 0.4rem;
+            margin-top: 0.3rem;
         }
 
-        /* Tables View */
+        /* ==========================================================================
+           7. DATA TABLES
+           ========================================================================== */
         .table-card {
             background: #ffffff;
             border-radius: 14px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-            overflow: hidden;
+            overflow-x: auto;
             margin-bottom: 2rem;
         }
 
         .table-header {
-            padding: 1.25rem 1.8rem;
+            padding: 1rem 1.25rem;
             border-bottom: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
 
         .table-header h2 {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             font-weight: 800;
             color: var(--text-primary);
         }
@@ -501,22 +618,23 @@ $total_claims = count($claims_list);
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            min-width: 600px;
         }
 
         .data-table th {
             background: #f8fafc;
-            padding: 0.9rem 1.5rem;
+            padding: 0.8rem 1rem;
             font-weight: 700;
             color: var(--text-secondary);
             border-bottom: 1px solid #e2e8f0;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .data-table td {
-            padding: 1rem 1.5rem;
+            padding: 0.85rem 1rem;
             border-bottom: 1px solid #f1f5f9;
             vertical-align: middle;
             color: var(--text-primary);
@@ -527,8 +645,8 @@ $total_claims = count($claims_list);
         }
 
         .item-thumb {
-            width: 48px;
-            height: 48px;
+            width: 42px;
+            height: 42px;
             border-radius: 8px;
             object-fit: cover;
             border: 1px solid #e2e8f0;
@@ -537,20 +655,16 @@ $total_claims = count($claims_list);
 
         .status-badge {
             display: inline-block;
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 800;
             letter-spacing: 0.5px;
             border: none;
             cursor: pointer;
             outline: none;
-            transition: transform 0.15s ease, opacity 0.2s ease;
-        }
-
-        .status-badge:hover {
-            transform: scale(1.05);
-            opacity: 0.9;
+            transition: transform 0.15s ease;
+            white-space: nowrap;
         }
 
         .badge-custody {
@@ -575,13 +689,14 @@ $total_claims = count($claims_list);
             background: #fee2e2;
             color: #b91c1c;
             border: 1px solid #fca5a5;
-            padding: 0.4rem 0.85rem;
+            padding: 0.35rem 0.75rem;
             border-radius: 6px;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 700;
             text-decoration: none;
             display: inline-block;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .btn-delete:hover {
@@ -589,37 +704,39 @@ $total_claims = count($claims_list);
             color: #ffffff;
         }
 
-        /* 2. Public Student Feed View */
+        /* ==========================================================================
+           8. PUBLIC STUDENT FEED PREVIEW
+           ========================================================================== */
         .preview-section {
             background: #ffffff;
             border-radius: 14px;
-            padding: 1.8rem;
+            padding: 1.25rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
             display: none;
         }
 
         .preview-header {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 1rem;
+            padding-bottom: 0.8rem;
         }
 
         .preview-header h2 {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--olfu-green);
         }
 
         .preview-header p {
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--text-secondary);
-            margin-top: 3px;
+            margin-top: 2px;
         }
 
         .items-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            gap: 1.25rem;
         }
 
         @media (max-width: 900px) {
@@ -647,11 +764,11 @@ $total_claims = count($claims_list);
 
         .preview-badge {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            padding: 4px 10px;
+            top: 10px;
+            left: 10px;
+            padding: 4px 9px;
             border-radius: 20px;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 800;
             z-index: 2;
         }
@@ -668,12 +785,12 @@ $total_claims = count($claims_list);
 
         .preview-img-wrapper {
             width: 100%;
-            height: 190px;
+            height: 180px;
             background: #f8fafc;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 0.85rem;
             border-bottom: 1px solid #f1f5f9;
         }
 
@@ -684,14 +801,14 @@ $total_claims = count($claims_list);
         }
 
         .preview-card-body {
-            padding: 1.1rem;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
             gap: 0.4rem;
         }
 
         .preview-card-body h3 {
-            font-size: 1.05rem;
+            font-size: 1rem;
             color: var(--text-primary);
             font-weight: 700;
             text-transform: capitalize;
@@ -701,16 +818,18 @@ $total_claims = count($claims_list);
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--olfu-green);
             background: var(--olfu-light);
-            padding: 4px 10px;
+            padding: 4px 9px;
             border-radius: 20px;
             width: fit-content;
         }
 
-        /* Modal Dialog */
+        /* ==========================================================================
+           9. MODAL POPUP DIALOG
+           ========================================================================== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -720,23 +839,24 @@ $total_claims = count($claims_list);
             z-index: 2000;
             align-items: center;
             justify-content: center;
+            padding: 1rem;
         }
 
         .modal-card {
             background: #ffffff;
             border-radius: 16px;
-            padding: 2.2rem;
-            width: 90%;
-            max-width: 500px;
+            padding: 1.8rem 1.4rem;
+            width: 100%;
+            max-width: 480px;
             position: relative;
             box-shadow: 0 20px 45px rgba(0,0,0,0.2);
         }
 
         .modal-close {
             position: absolute;
-            top: 16px;
-            right: 18px;
-            font-size: 1.5rem;
+            top: 14px;
+            right: 16px;
+            font-size: 1.4rem;
             cursor: pointer;
             color: var(--text-secondary);
         }
@@ -744,12 +864,12 @@ $total_claims = count($claims_list);
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 0.4rem;
-            margin-bottom: 1.1rem;
+            gap: 0.35rem;
+            margin-bottom: 1rem;
         }
 
         .form-group label {
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 700;
             color: #334155;
             text-transform: uppercase;
@@ -757,33 +877,78 @@ $total_claims = count($claims_list);
         }
 
         .form-group input, .form-group select {
-            padding: 0.75rem 1rem;
+            padding: 0.7rem 0.85rem;
             border: 1.5px solid #cbd5e1;
             border-radius: 8px;
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             outline: none;
             background: #ffffff;
-            transition: border-color 0.2s;
         }
 
         .form-group input:focus, .form-group select:focus {
             border-color: var(--olfu-green);
         }
 
+        /* ==========================================================================
+           10. DASHBOARD FOOTER
+           ========================================================================== */
         .dash-footer {
             background: #00331e;
             color: #cbd5e1;
-            padding: 1.8rem;
+            padding: 1.5rem 1rem;
             text-align: center;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             border-top: 4px solid var(--olfu-green);
             margin-top: auto;
+            width: 100%;
+        }
+
+        /* ==========================================================================
+           11. MOBILE BREAKPOINTS
+           ========================================================================== */
+        @media screen and (max-width: 650px) {
+            .dash-container {
+                margin-top: 4.8rem;
+            }
+
+            .brand-campus, .brand-portal {
+                display: none;
+            }
+
+            .brand-title {
+                font-size: 1.15rem;
+            }
+
+            .logo-circle {
+                width: 38px;
+                height: 38px;
+            }
+
+            .brand-logo {
+                width: 28px;
+                height: 28px;
+            }
+
+            .welcome-box {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 1.1rem;
+            }
+
+            .btn-open-modal {
+                width: 100%;
+                text-align: center;
+            }
+
+            .dash-footer {
+                padding: 1.2rem 0.8rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- NAVBAR WITH VIEW SWITCHER AND CLAIM REQUESTS BUTTON -->
+    <!-- NAVBAR WITH FIXED TOP HEADER -->
     <header class="navbar">
         <div class="nav-container">
             <a href="dashboard.php" class="brand-link">
@@ -792,23 +957,52 @@ $total_claims = count($claims_list);
                 </div>
                 <div class="brand-text">
                     <div class="brand-header-row">
-                        <span class="brand-title">OLFU</span>
-                        <span class="brand-campus">ANTIPOLO CAMPUS</span>
+                        <span class="brand-title">OLFU CUSTODIAN</span>
+                        <span class="brand-campus">ANTIPOLO</span>
                     </div>
-                    <span class="brand-portal">Custodian & Security Console</span>
+                    <span class="brand-portal">Security Console</span>
                 </div>
             </a>
-            <div class="nav-right">
-                <button type="button" class="btn-claims-view" onclick="showClaimsView()">
-                    📩 Claim Requests <span class="counter-badge"><?php echo $total_claims; ?></span>
+
+            <div class="nav-right-actions">
+                <button class="burger-btn" onclick="openSidebar()" aria-label="Open Navigation Menu">
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
+                    <span class="burger-bar"></span>
                 </button>
-                <button type="button" class="btn-view-toggle" id="btnViewToggle" onclick="toggleDashboardView()">
-                    👁️ Student Feed View
-                </button>
-                <a href="dashboard.php?action=logout" class="btn-logout">Log Out</a>
             </div>
         </div>
     </header>
+
+    <!-- SIDEBAR DRAWER MENU -->
+    <div id="sidebarOverlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+    <aside id="sidebarDrawer" class="sidebar-drawer">
+        <div class="sidebar-header">
+            <h3>CUSTODIAN MENU</h3>
+            <span class="sidebar-close" onclick="closeSidebar()">&times;</span>
+        </div>
+        
+        <nav class="sidebar-links">
+            <div class="sidebar-section-title">Console Navigation</div>
+            <button type="button" class="sidebar-claims-btn" onclick="showClaimsView(); closeSidebar();">
+                <span>📩 Claim Requests</span>
+                <span class="counter-badge"><?php echo $total_claims; ?></span>
+            </button>
+            <button type="button" id="btnViewToggle" onclick="toggleDashboardView(); closeSidebar();">
+                <span>👁️ Student Feed View</span>
+            </button>
+
+            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 0.6rem 0;">
+            <div class="sidebar-section-title">Account</div>
+            <a href="dashboard.php?action=logout" class="sidebar-logout-link">
+                <span>🚪 Log Out Console</span>
+            </a>
+        </nav>
+
+        <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; text-align: center;">
+            OLFU Antipolo Security Office
+        </div>
+    </aside>
 
     <main class="dash-container">
         <!-- Welcome Banner -->
@@ -840,7 +1034,7 @@ $total_claims = count($claims_list);
             </div>
         </section>
 
-        <!-- 1. Inventory Management Table View -->
+        <!-- 1. Inventory Management Table View (DEFAULT VIEW) -->
         <section class="table-card" id="viewTable">
             <div class="table-header">
                 <h2>Current Campus Belongings (Inventory Table)</h2>
@@ -1017,12 +1211,12 @@ $total_claims = count($claims_list);
         </section>
     </main>
 
-    <!-- Custodian Register Item Modal with Persistent Custom Location -->
+    <!-- Custodian Register Item Modal -->
     <div id="registerModal" class="modal-overlay">
         <div class="modal-card">
             <span class="modal-close" onclick="closeRegisterModal()">&times;</span>
-            <h2 style="color: var(--olfu-green); font-size: 1.3rem; margin-bottom: 0.3rem;">Log New Belonging</h2>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1.4rem;">Add an item directly to the active inventory feed.</p>
+            <h2 style="color: var(--olfu-green); font-size: 1.2rem; margin-bottom: 0.3rem;">Log New Belonging</h2>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 1.2rem;">Add an item directly to the active inventory feed.</p>
 
             <form method="POST" action="" enctype="multipart/form-data">
                 <input type="hidden" name="quick_report" value="1">
@@ -1047,7 +1241,6 @@ $total_claims = count($claims_list);
                     </select>
                 </div>
 
-                <!-- Custom Location Field (Appears only when "Others" is selected) -->
                 <div class="form-group" id="adminCustomBuildingGroup" style="display: none;">
                     <label>Specify Facility / Area</label>
                     <input type="text" id="admin_custom_building" name="custom_building" placeholder="e.g. Student Lounge, Parking Lot, Oval...">
@@ -1067,39 +1260,50 @@ $total_claims = count($claims_list);
         Our Lady of Fatima University &bull; Antipolo Campus Security & Facilities Custody Management
     </footer>
 
-    <!-- View Switchers & Instant AJAX Toggling -->
+    <!-- View Switchers, Sidebar Toggles & Instant AJAX Toggling -->
     <script>
-        let currentView = 'claims'; // Default to claims view if already viewing requests
+        let currentView = 'table';
 
+        // Open slide-out navigation menu
+        function openSidebar() {
+            document.getElementById('sidebarDrawer').classList.add('active');
+            document.getElementById('sidebarOverlay').classList.add('active');
+        }
+
+        // Close slide-out navigation menu
+        function closeSidebar() {
+            document.getElementById('sidebarDrawer').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        // Toggle between table view and visual student feed
         function toggleDashboardView() {
             const tableView = document.getElementById('viewTable');
             const previewView = document.getElementById('viewPreview');
             const claimsView = document.getElementById('viewClaims');
-            const toggleBtn = document.getElementById('btnViewToggle');
 
             if (currentView === 'table' || currentView === 'claims') {
                 tableView.style.display = 'none';
                 claimsView.style.display = 'none';
                 previewView.style.display = 'block';
-                toggleBtn.innerHTML = '📋 Inventory Table';
                 currentView = 'preview';
             } else {
                 previewView.style.display = 'none';
                 claimsView.style.display = 'none';
                 tableView.style.display = 'block';
-                toggleBtn.innerHTML = '👁️ Student Feed View';
                 currentView = 'table';
             }
         }
 
+        // Switch workspace to Claim Requests table
         function showClaimsView() {
             document.getElementById('viewTable').style.display = 'none';
             document.getElementById('viewPreview').style.display = 'none';
             document.getElementById('viewClaims').style.display = 'block';
-            document.getElementById('btnViewToggle').innerHTML = '👁️ Student Feed View';
             currentView = 'claims';
         }
 
+        // Switch workspace to Inventory table
         function showInventoryView() {
             document.getElementById('viewClaims').style.display = 'none';
             document.getElementById('viewPreview').style.display = 'none';
@@ -1107,6 +1311,7 @@ $total_claims = count($claims_list);
             currentView = 'table';
         }
 
+        // Show/hide custom building text input field
         function toggleAdminCustomBuilding(val) {
             const group = document.getElementById('adminCustomBuildingGroup');
             const input = document.getElementById('admin_custom_building');
@@ -1121,6 +1326,7 @@ $total_claims = count($claims_list);
             }
         }
 
+        // AJAX handler for updating inventory item status
         function toggleItemStatus(filename, btnElement) {
             const formData = new FormData();
             formData.append('ajax_toggle', '1');
@@ -1159,6 +1365,7 @@ $total_claims = count($claims_list);
             .catch(err => console.error('Status toggle failed:', err));
         }
 
+        // AJAX handler for approving/reverting claim requests
         function toggleClaimStatus(claimId, btnElement) {
             const formData = new FormData();
             formData.append('ajax_claim_status', '1');
@@ -1179,7 +1386,6 @@ $total_claims = count($claims_list);
                         btnElement.innerHTML = '⏳ PENDING';
                     }
 
-                    // Awtomatikong i-update ang metrics sa itaas
                     if (data.in_custody !== undefined) {
                         document.getElementById('metricInCustody').innerText = data.in_custody;
                     }
@@ -1191,14 +1397,17 @@ $total_claims = count($claims_list);
             .catch(err => console.error('Claim toggle failed:', err));
         }
 
+        // Open modal dialog for logging new items
         function openRegisterModal() {
             document.getElementById('registerModal').style.display = 'flex';
         }
+
+        // Close modal dialog for logging new items
         function closeRegisterModal() {
             document.getElementById('registerModal').style.display = 'none';
         }
 
-        // Auto-open claims tab if directed by URL parameter
+        // Automatically display claim requests if view parameter is set in URL
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('view') === 'claims') {
             showClaimsView();

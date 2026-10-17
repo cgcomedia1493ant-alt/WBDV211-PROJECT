@@ -105,7 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
 
-        body {
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
             background-color: var(--bg);
             color: var(--text-main);
             min-height: 100vh;
@@ -115,29 +117,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .navbar {
             background: linear-gradient(135deg, rgba(0, 90, 54, 0.96) 0%, rgba(0, 68, 40, 0.98) 100%);
-            padding: 0.85rem 1.5rem;
+            padding: 0.75rem 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            width: 100%;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
         .nav-container {
             max-width: 1040px;
             margin: auto;
+            padding: 0 0.85rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 0.5rem;
         }
 
         .brand-link {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             text-decoration: none;
             color: #ffffff;
+            min-width: 0;
+            flex-shrink: 1;
         }
 
         .logo-circle {
-            width: 48px;
-            height: 48px;
+            width: 42px;
+            height: 42px;
             background: #ffffff;
             border-radius: 50%;
             display: flex;
@@ -145,38 +155,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             justify-content: center;
             border: 2px solid var(--olfu-gold);
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .logo-circle img {
-            width: 38px;
-            height: 38px;
+            width: 32px;
+            height: 32px;
             object-fit: contain;
         }
 
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+        }
+
         .brand-title {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 800;
             letter-spacing: 0.5px;
+            line-height: 1;
+            white-space: nowrap;
         }
 
         .brand-campus {
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             color: var(--olfu-gold);
             font-weight: 700;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
             text-transform: uppercase;
+            margin-top: 2px;
+            white-space: nowrap;
         }
 
         .btn-back {
             color: #ffffff;
             text-decoration: none;
-            font-size: 0.88rem;
+            font-size: 0.82rem;
             font-weight: 700;
-            padding: 0.5rem 1rem;
+            padding: 0.45rem 0.8rem;
             border-radius: 8px;
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.3);
             transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .btn-back:hover {
@@ -187,18 +211,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .page-container {
             max-width: 780px;
             width: 100%;
-            margin: 2.5rem auto;
-            padding: 0 1.25rem;
+            margin: 1.8rem auto;
+            padding: 0 1rem;
             flex-grow: 1;
         }
 
         .form-card {
             background: #ffffff;
-            border-radius: 20px;
-            padding: 2.5rem 2.2rem;
+            border-radius: 18px;
+            padding: 2rem 1.5rem;
             box-shadow: 0 12px 35px rgba(0, 90, 54, 0.08);
             border: 1px solid #e2e8f0;
             position: relative;
+            width: 100%;
         }
 
         .form-card::before {
@@ -209,23 +234,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             right: 0;
             height: 4px;
             background: linear-gradient(90deg, var(--olfu-green), var(--olfu-gold));
-            border-radius: 20px 20px 0 0;
+            border-radius: 18px 18px 0 0;
         }
 
         .form-header {
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-header h1 {
             color: var(--olfu-green);
-            font-size: 1.6rem;
+            font-size: 1.45rem;
             font-weight: 800;
             margin-bottom: 0.3rem;
         }
 
         .form-header p {
             color: var(--text-muted);
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             line-height: 1.5;
         }
 
@@ -252,19 +277,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .report-form {
             display: flex;
             flex-direction: column;
-            gap: 1.35rem;
+            gap: 1.2rem;
         }
 
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 1.2rem;
-        }
-
-        @media (max-width: 640px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
+            gap: 1rem;
         }
 
         .form-group {
@@ -274,7 +293,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .form-group label {
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             font-weight: 700;
             color: #334155;
             text-transform: uppercase;
@@ -283,14 +302,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .form-group input,
         .form-group select {
-            padding: 0.8rem 1rem;
+            padding: 0.75rem 0.9rem;
             border: 1.5px solid var(--border-color);
             border-radius: 10px;
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             color: var(--text-main);
             outline: none;
             background: #ffffff;
             transition: all 0.2s ease;
+            width: 100%;
         }
 
         .form-group input:focus,
@@ -302,7 +322,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .file-dropzone {
             border: 2px dashed #cbd5e1;
             border-radius: 12px;
-            padding: 1.8rem 1.5rem;
+            padding: 1.5rem 1.2rem;
             text-align: center;
             background: #f8fafc;
             cursor: pointer;
@@ -325,25 +345,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .dropzone-icon {
-            font-size: 2.2rem;
-            margin-bottom: 0.4rem;
+            font-size: 2rem;
+            margin-bottom: 0.3rem;
         }
 
         .dropzone-text {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--text-main);
         }
 
         .dropzone-sub {
-            font-size: 0.78rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 4px;
         }
 
         .file-selected-name {
             margin-top: 0.6rem;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             font-weight: 700;
             color: var(--olfu-green);
         }
@@ -351,16 +371,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .btn-submit {
             background: linear-gradient(135deg, var(--olfu-green) 0%, var(--olfu-hover) 100%);
             color: #ffffff;
-            padding: 0.95rem;
+            padding: 0.9rem;
             border: none;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 800;
             letter-spacing: 0.4px;
             cursor: pointer;
-            margin-top: 0.6rem;
+            margin-top: 0.4rem;
             box-shadow: 0 6px 18px rgba(0, 90, 54, 0.25);
             transition: all 0.2s ease;
+            width: 100%;
         }
 
         .btn-submit:hover {
@@ -370,12 +391,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .page-footer {
             background: #ffffff;
-            padding: 1.5rem;
+            padding: 1.25rem 1rem;
             text-align: center;
-            font-size: 0.82rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
             border-top: 1px solid #e2e8f0;
             margin-top: auto;
+            width: 100%;
+        }
+
+        /* Responsive Breakpoints */
+        @media screen and (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-card {
+                padding: 1.5rem 1.1rem;
+            }
+
+            .brand-title {
+                font-size: 1rem;
+            }
+
+            .brand-campus {
+                font-size: 0.68rem;
+            }
+
+            .btn-back {
+                font-size: 0.75rem;
+                padding: 0.4rem 0.6rem;
+            }
         }
     </style>
 </head>
@@ -388,12 +434,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="logo-circle">
                     <img src="frontend/assets/images/OLFU LOGO.png" alt="OLFU Seal">
                 </div>
-                <div>
+                <div class="brand-text">
                     <div class="brand-title">OLFU ANTIPOLO</div>
                     <div class="brand-campus">Lost & Found Portal</div>
                 </div>
             </a>
-            <a href="index.php" class="btn-back">&larr; Return to Home Feed</a>
+            <a href="index.php" class="btn-back">&larr; Home Feed</a>
         </div>
     </header>
 

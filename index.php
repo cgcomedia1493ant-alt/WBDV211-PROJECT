@@ -10,12 +10,24 @@ $is_logged_in = $is_admin || $is_student;
 if ($is_admin) {
     $user_display = 'Custodian';
     $first_name = 'Custodian';
+    $user_initials = 'CA';
 } elseif ($is_student) {
     $user_display = $_SESSION['user_name'] ?? 'Student';
-    $first_name = explode(' ', trim($user_display))[0];
+    $name_parts = array_values(array_filter(explode(' ', trim($user_display))));
+    $first_name = $name_parts[0] ?? 'Student';
+    
+    // Generate two-letter initials (First Name Initial + Last Name Initial)
+    if (count($name_parts) >= 2) {
+        $first_initial = substr($name_parts[0], 0, 1);
+        $last_initial = substr(end($name_parts), 0, 1);
+        $user_initials = strtoupper($first_initial . $last_initial);
+    } else {
+        $user_initials = strtoupper(substr($first_name, 0, 2));
+    }
 } else {
     $user_display = null;
     $first_name = '';
+    $user_initials = '';
 }
 ?>
 <!DOCTYPE html>
@@ -48,7 +60,9 @@ if ($is_admin) {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        body {
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
             background-color: var(--bg);
             color: var(--text-primary);
             min-height: 100vh;
@@ -74,21 +88,25 @@ if ($is_admin) {
         }
 
         /* ==========================================================================
-           3. NAVBAR & BRANDING
+           3. FIXED TOP NAVBAR & BRANDING
            ========================================================================== */
         .navbar {
-            background: linear-gradient(135deg, rgba(0, 90, 54, 0.96) 0%, rgba(0, 68, 40, 0.98) 100%);
+            background: linear-gradient(135deg, rgba(0, 90, 54, 0.98) 0%, rgba(0, 68, 40, 0.99) 100%);
             padding: 0.85rem 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 1000;
+            width: 100%;
+            transition: all 0.2s ease;
         }
 
         .nav-container {
             max-width: 1140px;
             margin: auto;
-            padding: 0 1.5rem;
+            padding: 0 1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -97,28 +115,31 @@ if ($is_admin) {
         .brand-link {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             text-decoration: none;
+            min-width: 0;
         }
 
         .logo-circle {
-            width: 60px;
-            height: 60px;
+            width: 48px;
+            height: 48px;
             background: #ffffff;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-            border: 2.5px solid var(--olfu-gold);
+            border: 2px solid var(--olfu-gold);
             overflow: hidden;
             flex-shrink: 0;
+            transition: all 0.2s ease;
         }
 
         .brand-logo {
-            width: 50px;
-            height: 50px;
+            width: 38px;
+            height: 38px;
             object-fit: contain;
+            transition: all 0.2s ease;
         }
 
         .brand-text {
@@ -126,69 +147,147 @@ if ($is_admin) {
             flex-direction: column;
             justify-content: center;
             gap: 2px;
+            min-width: 0;
         }
 
         .brand-header-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
         .brand-title {
-            font-size: 2.1rem;
+            font-size: 1.5rem;
             font-weight: 900;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             color: #ffffff;
             line-height: 1;
+            transition: all 0.2s ease;
         }
 
         .brand-campus {
-            font-size: 0.88rem;
+            font-size: 0.75rem;
             font-weight: 800;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             color: var(--olfu-gold);
             text-transform: uppercase;
             border-left: 2px solid rgba(255,255,255,0.3);
-            padding-left: 10px;
+            padding-left: 8px;
+            white-space: nowrap;
+            transition: all 0.2s ease;
         }
 
         .brand-portal {
-            font-size: 0.92rem;
+            font-size: 0.8rem;
             font-weight: 500;
             color: var(--olfu-light);
             opacity: 0.95;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s ease;
         }
 
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        /* Clean & Sleek Single-Line User Greeting Chip */
+        .user-greeting-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 5px 14px 5px 6px;
+            border-radius: 20px;
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .user-greeting-chip:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: var(--olfu-gold);
+        }
+
+        .user-avatar-circle {
+            width: 26px;
+            height: 26px;
+            background: var(--olfu-gold);
+            color: #004428;
+            font-weight: 800;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+
+        .user-name-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
         }
 
         .nav-link-login {
             color: #ffffff;
             text-decoration: none;
             font-weight: 700;
-            font-size: 0.95rem;
-            padding: 0.5rem 0.8rem;
-        }
-
-        .btn-report {
-            background: #ffffff;
-            color: var(--olfu-green);
-            padding: 0.65rem 1.4rem;
-            text-decoration: none;
+            font-size: 0.88rem;
+            padding: 0.4rem 0.75rem;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             transition: all 0.2s ease;
         }
 
-        .btn-report:hover {
-            background: #f0fdf4;
-            transform: translateY(-1px);
+        .nav-link-login:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        @media screen and (min-width: 992px) {
+            .navbar {
+                padding: 1.1rem 0;
+            }
+
+            .logo-circle {
+                width: 56px;
+                height: 56px;
+                border-width: 2.5px;
+            }
+
+            .brand-logo {
+                width: 44px;
+                height: 44px;
+            }
+
+            .brand-title {
+                font-size: 1.85rem;
+            }
+
+            .brand-campus {
+                font-size: 0.85rem;
+                padding-left: 10px;
+            }
+
+            .brand-portal {
+                font-size: 0.88rem;
+            }
+
+            .burger-btn {
+                padding: 8px 10px;
+            }
         }
 
         /* ==========================================================================
@@ -199,11 +298,12 @@ if ($is_admin) {
             border: 1.5px solid rgba(255, 255, 255, 0.35);
             border-radius: 8px;
             cursor: pointer;
-            padding: 8px 10px;
+            padding: 7px 9px;
             display: flex;
             flex-direction: column;
             gap: 4px;
             transition: all 0.2s ease;
+            flex-shrink: 0;
         }
 
         .burger-btn:hover {
@@ -212,8 +312,8 @@ if ($is_admin) {
         }
 
         .burger-bar {
-            width: 22px;
-            height: 2.5px;
+            width: 20px;
+            height: 2px;
             background-color: #ffffff;
             border-radius: 2px;
         }
@@ -235,7 +335,8 @@ if ($is_admin) {
             position: fixed;
             top: 0;
             right: -320px;
-            width: 310px;
+            width: 290px;
+            max-width: 85vw;
             height: 100vh;
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(16px);
@@ -244,7 +345,7 @@ if ($is_admin) {
             display: flex;
             flex-direction: column;
             transition: right 0.35s ease;
-            padding: 1.6rem 1.4rem;
+            padding: 1.5rem 1.25rem;
         }
 
         .sidebar-drawer.active {
@@ -321,15 +422,31 @@ if ($is_admin) {
             color: #ffffff !important;
         }
 
+        .sidebar-logout-link {
+            background: #fef2f2 !important;
+            border: 1px solid #fecaca !important;
+            color: #b91c1c !important;
+            font-weight: 700 !important;
+        }
+
+        .sidebar-logout-link:hover {
+            background: #ef4444 !important;
+            color: #ffffff !important;
+        }
+
         /* ==========================================================================
-           5. HERO BANNER
+           5. HERO BANNER WITH BALANCED VISIBLE OLFU BUILDING BACKGROUND
            ========================================================================== */
-        .hero-section {
-            background: linear-gradient(135deg, rgba(0, 90, 54, 0.94) 0%, rgba(0, 68, 40, 0.96) 100%);
+       .hero-section {
+            background: linear-gradient(135deg, rgba(0, 90, 54, 0.82) 0%, rgba(0, 68, 40, 0.86) 100%),
+                        url('frontend/assets/images/OLFU Front.png') center / 70% no-repeat;
             color: #ffffff;
-            padding: 2.6rem 1.25rem 2.8rem;
+            padding: 9rem 1rem 5.1rem;
             text-align: center;
             border-bottom: 3px solid var(--olfu-gold);
+            width: 100%;
+            position: relative;
+            overflow: hidden;
         }
 
         .hero-content {
@@ -341,47 +458,52 @@ if ($is_admin) {
             display: inline-block;
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 800;
             letter-spacing: 0.8px;
             margin-bottom: 0.8rem;
         }
 
         .hero-title {
-            font-size: 1.95rem;
+            font-size: 1.8rem;
             font-weight: 800;
             margin-bottom: 0.6rem;
             letter-spacing: -0.3px;
             line-height: 1.25;
+            word-wrap: break-word;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .hero-subtitle {
-            font-size: 0.95rem;
-            opacity: 0.9;
+            font-size: 0.9rem;
+            opacity: 0.95;
             margin-bottom: 1.5rem;
-            line-height: 1.55;
+            line-height: 1.5;
             max-width: 580px;
             margin-left: auto;
             margin-right: auto;
+            padding: 0 0.5rem;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
         }
 
         .hero-actions {
             display: flex;
             justify-content: center;
-            gap: 0.85rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
         }
 
         .btn-hero-primary {
             background: var(--olfu-gold);
             color: #004428;
-            padding: 0.7rem 1.6rem;
+            padding: 0.7rem 1.4rem;
             border-radius: 7px;
             text-decoration: none;
             font-weight: 800;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             transition: transform 0.2s;
+            display: inline-block;
         }
 
         .btn-hero-primary:hover {
@@ -389,15 +511,32 @@ if ($is_admin) {
         }
 
         .btn-hero-secondary {
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.15);
             color: #ffffff;
             border: 1.5px solid rgba(255, 255, 255, 0.4);
-            padding: 0.7rem 1.6rem;
+            padding: 0.7rem 1.4rem;
             border-radius: 7px;
             text-decoration: none;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             backdrop-filter: blur(4px);
+            display: inline-block;
+        }
+
+        /* 3-Step Row Responsive Layout */
+        .process-cards-section {
+            max-width: 1140px;
+            margin: -1.6rem auto 2.2rem;
+            padding: 0 1rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .process-cards-wrapper {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            width: 100%;
         }
 
         /* ==========================================================================
@@ -405,45 +544,33 @@ if ($is_admin) {
            ========================================================================== */
         .container {
             max-width: 1140px;
-            margin: 2rem auto;
-            padding: 0 1.25rem;
+            margin: 1.5rem auto;
+            padding: 0 1rem;
         }
 
         .filter-card {
-            padding: 1.5rem 1.8rem;
+            padding: 1.25rem 1.5rem;
             border-radius: 14px;
             border-left: 5px solid var(--olfu-green);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .filter-card h2 {
             color: var(--olfu-green);
-            font-size: 1.45rem;
+            font-size: 1.3rem;
             font-weight: 800;
         }
 
         .filter-card p {
             color: var(--text-secondary);
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             margin-top: 4px;
         }
 
         .items-grid {
             display: grid !important;
             grid-template-columns: repeat(3, 1fr) !important;
-            gap: 1.5rem !important;
-        }
-
-        @media (max-width: 900px) {
-            .items-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .items-grid {
-                grid-template-columns: 1fr !important;
-            }
+            gap: 1.25rem !important;
         }
 
         .item-card {
@@ -462,11 +589,11 @@ if ($is_admin) {
 
         .badge {
             position: absolute;
-            top: 14px;
-            left: 14px;
-            padding: 5px 12px;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             font-weight: 800;
             letter-spacing: 0.8px;
             z-index: 2;
@@ -491,13 +618,13 @@ if ($is_admin) {
 
         .card-img-wrapper {
             width: 100%;
-            height: 220px;
+            height: 200px;
             background: rgba(248, 250, 252, 0.7);
             overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 1rem;
+            padding: 0.85rem;
             border-bottom: 1px solid rgba(226, 232, 240, 0.8);
         }
 
@@ -512,15 +639,15 @@ if ($is_admin) {
         }
 
         .card-content {
-            padding: 1.3rem;
+            padding: 1.1rem;
             display: flex;
             flex-direction: column;
-            gap: 0.6rem;
+            gap: 0.5rem;
             flex-grow: 1;
         }
 
         .card-content h3 {
-            font-size: 1.15rem;
+            font-size: 1.05rem;
             color: var(--text-primary);
             font-weight: 700;
             margin: 0;
@@ -530,28 +657,29 @@ if ($is_admin) {
         .location-badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.82rem;
+            gap: 5px;
+            font-size: 0.78rem;
             font-weight: 600;
             color: var(--olfu-green);
             background-color: var(--olfu-light);
-            padding: 5px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
             width: fit-content;
-            margin: 4px 0 10px 0;
+            margin: 2px 0 8px 0;
         }
 
         .btn-claim {
             margin-top: auto;
-            padding: 0.75rem;
+            padding: 0.7rem;
             background: var(--olfu-green);
             color: #ffffff;
             border: none;
             border-radius: 8px;
             font-weight: 700;
-            font-size: 0.92rem;
+            font-size: 0.88rem;
             cursor: pointer;
             transition: background 0.2s ease;
+            width: 100%;
         }
 
         .btn-claim:hover {
@@ -561,7 +689,7 @@ if ($is_admin) {
         /* Authentication barrier locked card */
         .auth-gate-box {
             text-align: center;
-            padding: 3.5rem 2rem;
+            padding: 2.5rem 1.25rem;
             border-radius: 16px;
             border: 2px dashed rgba(0, 90, 54, 0.35);
             max-width: 640px;
@@ -570,33 +698,33 @@ if ($is_admin) {
 
         .auth-gate-title {
             color: var(--olfu-green);
-            font-size: 1.45rem;
+            font-size: 1.3rem;
             font-weight: 800;
             margin-bottom: 0.5rem;
         }
 
         .auth-gate-text {
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            line-height: 1.55;
-            margin-bottom: 1.8rem;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
         }
 
         .auth-gate-actions {
             display: flex;
             justify-content: center;
-            gap: 1rem;
+            gap: 0.75rem;
             flex-wrap: wrap;
         }
 
         .btn-auth-login {
             background: var(--olfu-green);
             color: white;
-            padding: 0.85rem 2rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 700;
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             display: inline-block;
             box-shadow: 0 4px 12px rgba(0, 90, 54, 0.2);
             transition: background 0.2s;
@@ -610,11 +738,11 @@ if ($is_admin) {
             background: #ffffff;
             color: var(--olfu-green);
             border: 2px solid var(--olfu-green);
-            padding: 0.85rem 2rem;
+            padding: 0.75rem 1.5rem;
             border-radius: 8px;
             font-weight: 700;
             text-decoration: none;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             display: inline-block;
             transition: all 0.2s ease;
         }
@@ -624,15 +752,112 @@ if ($is_admin) {
         }
 
         /* ==========================================================================
-           7. GREEN UNIVERSITY FOOTER
-           ========================================================================= */
+           7. ENHANCED MULTI-COLUMN GREEN UNIVERSITY FOOTER STYLES
+           ========================================================================== */
         .footer {
-            background: #00331e;
+            background: #002b19;
             color: #cbd5e1;
-            padding: 2.5rem 1.5rem;
+            padding: 3rem 1rem 1.5rem;
             margin-top: 4rem;
-            border-top: 4px solid var(--olfu-green);
-            text-align: center;
+            border-top: 4px solid var(--olfu-gold);
+            width: 100%;
+        }
+
+        .footer-container {
+            max-width: 1140px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1.2fr;
+            gap: 2.5rem;
+            text-align: left;
+        }
+
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .footer-brand-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .footer-logo {
+            width: 38px;
+            height: 38px;
+            background: #ffffff;
+            border-radius: 50%;
+            padding: 2px;
+            border: 1.5px solid var(--olfu-gold);
+            object-fit: contain;
+        }
+
+        .footer-brand h4 {
+            color: #ffffff;
+            font-size: 1.05rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        .footer-brand p {
+            font-size: 0.82rem;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+
+        .footer-title {
+            color: var(--olfu-gold);
+            font-size: 0.88rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 0.9rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .footer-links a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--olfu-gold);
+            text-decoration: underline;
+        }
+
+        .footer-info-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: #e2e8f0;
+        }
+
+        .footer-bottom {
+            max-width: 1140px;
+            margin: 2rem auto 0;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            font-size: 0.78rem;
+            color: #64748b;
         }
 
         /* ==========================================================================
@@ -647,16 +872,19 @@ if ($is_admin) {
             align-items: center;
             justify-content: center;
             z-index: 3000;
+            padding: 1rem;
         }
 
         .modal-content {
-            padding: 2.2rem;
+            padding: 1.8rem 1.4rem;
             border-radius: 16px;
-            width: 90%;
-            max-width: 480px;
+            width: 100%;
+            max-width: 580px;
             position: relative;
             background: #ffffff;
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .close-btn {
@@ -671,6 +899,114 @@ if ($is_admin) {
 
         .close-btn:hover {
             color: var(--text-primary);
+        }
+
+        /* Responsive Campus Map Container */
+        .campus-map-wrapper {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1.5px solid #cbd5e1;
+            background: #f8fafc;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .campus-map-img {
+            width: 100%;
+            height: auto;
+            max-height: 320px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* ==========================================================================
+           9. MOBILE MEDIA QUERIES (RESPONSIVE OVERRIDES)
+           ========================================================================== */
+        @media screen and (max-width: 850px) {
+            .items-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .footer-container {
+                grid-template-columns: 1fr;
+                gap: 1.8rem;
+            }
+            
+            .footer-bottom {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media screen and (max-width: 650px) {
+            .hero-section {
+                padding-top: 5.5rem;
+            }
+
+            .brand-campus, .brand-portal {
+                display: none;
+            }
+
+            .brand-title {
+                font-size: 1.35rem;
+            }
+
+            .logo-circle {
+                width: 42px;
+                height: 42px;
+            }
+
+            .brand-logo {
+                width: 34px;
+                height: 34px;
+            }
+
+            .user-greeting-chip {
+                padding: 4px 10px 4px 5px;
+            }
+
+            .user-avatar-circle {
+                width: 24px;
+                height: 24px;
+                font-size: 0.68rem;
+            }
+
+            .user-name-title {
+                font-size: 0.8rem;
+            }
+
+            .hero-title {
+                font-size: 1.45rem;
+            }
+
+            .hero-subtitle {
+                font-size: 0.85rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-hero-primary, .btn-hero-secondary {
+                width: 100%;
+                text-align: center;
+            }
+
+            .process-cards-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .process-cards-section {
+                margin-top: -1rem;
+            }
+
+            .items-grid {
+                grid-template-columns: 1fr !important;
+            }
         }
     </style>
 </head>
@@ -692,17 +1028,20 @@ if ($is_admin) {
                 </div>
             </a>
 
-            <!-- Navigation Actions & Greeting -->
+            <!-- Clean Top Right Actions -->
             <div class="nav-right">
                 <?php if ($is_logged_in): ?>
-                    <span style="color: #ffffff; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-                        Hi, <?php echo htmlspecialchars($first_name); ?> <span style="font-size: 1.35rem; line-height: 1;">👋🏻</span>
-                    </span>
-                    <a href="backend/login/logout.php" class="nav-link-login" style="color: #fca5a5;">Logout</a>
+                    <!-- Single-Line Clean User Greeting Chip with First & Last Name Initials -->
+                    <div class="user-greeting-chip">
+                        <div class="user-avatar-circle">
+                            <?php echo htmlspecialchars($user_initials); ?>
+                        </div>
+                        <span class="user-name-title">Hi, <?php echo htmlspecialchars($first_name); ?> 👋🏻</span>
+                    </div>
                 <?php else: ?>
                     <a href="backend/login/login.php" class="nav-link-login">Login</a>
                 <?php endif; ?>
-                <a href="<?php echo $is_logged_in ? 'report.php' : 'backend/login/login.php'; ?>" class="btn-report">+ Report Item</a>
+
                 <button class="burger-btn" onclick="openSidebar()" aria-label="Open Navigation Settings">
                     <span class="burger-bar"></span>
                     <span class="burger-bar"></span>
@@ -724,11 +1063,15 @@ if ($is_admin) {
             <div class="sidebar-section-title">Support & Help Desk</div>
             <a href="javascript:void(0)" onclick="openContactModal(); closeSidebar();">📞 Contact Support</a>
             <a href="javascript:void(0)" onclick="openGuidelinesModal(); closeSidebar();">📋 Claiming Guidelines</a>
-            <a href="javascript:void(0)" onclick="openBuildingsModal(); closeSidebar();">🏢 Campus Buildings</a>
+            <a href="javascript:void(0)" onclick="openBuildingsModal(); closeSidebar();">🏢 Campus Map & Buildings</a>
 
             <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 0.6rem 0;">
-            <div class="sidebar-section-title">Staff Administration</div>
+            <div class="sidebar-section-title">Account & Administration</div>
             <a href="backend/admin/dashboard.php" class="sidebar-admin-link">🛡️ Admin Portal Login</a>
+            
+            <?php if ($is_logged_in): ?>
+                <a href="backend/login/logout.php" class="sidebar-logout-link">🚪 Log Out Account</a>
+            <?php endif; ?>
         </nav>
 
         <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #94a3b8; text-align: center;">
@@ -736,7 +1079,7 @@ if ($is_admin) {
         </div>
     </aside>
 
-    <!-- HERO LANDING BANNER -->
+    <!-- HERO LANDING BANNER WITH BALANCED VISIBLE BUILDING BACKGROUND -->
     <section class="hero-section">
         <div class="hero-content">
             <span class="hero-badge glass-badge">OFFICIAL CAMPUS RECOVERY DESK</span>
@@ -749,23 +1092,23 @@ if ($is_admin) {
         </div>
     </section>
 
-    <!-- 3-STEP PROCESS CARDS (HORIZONTAL ROW) -->
-    <section style="max-width: 1140px; margin: -1.6rem auto 2.2rem; padding: 0 1.25rem; position: relative; z-index: 10;">
-        <div style="display: flex; flex-direction: row; justify-content: space-between; gap: 1.2rem; width: 100%;">
-            <div class="glass-panel" style="flex: 1; padding: 1.2rem 1.4rem; border-radius: 14px; border-top: 4px solid var(--olfu-green) !important;">
-                <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">🔎</div>
-                <h3 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">1. Search the Feed</h3>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">Check updates with facility location tags across campus grounds.</p>
+    <!-- 3-STEP PROCESS CARDS -->
+    <section class="process-cards-section">
+        <div class="process-cards-wrapper">
+            <div class="glass-panel" style="padding: 1.1rem 1.25rem; border-radius: 14px; border-top: 4px solid var(--olfu-green) !important;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">🔎</div>
+                <h3 style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">1. Search the Feed</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">Check updates with facility location tags across campus grounds.</p>
             </div>
-            <div class="glass-panel" style="flex: 1; padding: 1.2rem 1.4rem; border-radius: 14px; border-top: 4px solid var(--olfu-gold) !important;">
-                <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">📝</div>
-                <h3 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">2. Submit Claim Proof</h3>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">Use the Claim button to submit identifying proof using your OLFU email.</p>
+            <div class="glass-panel" style="padding: 1.1rem 1.25rem; border-radius: 14px; border-top: 4px solid var(--olfu-gold) !important;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">📝</div>
+                <h3 style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">2. Submit Claim Proof</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">Use the Claim button to submit identifying proof using your OLFU email.</p>
             </div>
-            <div class="glass-panel" style="flex: 1; padding: 1.2rem 1.4rem; border-radius: 14px; border-top: 4px solid var(--olfu-green) !important;">
-                <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">🏛️</div>
-                <h3 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">3. Claim at Guard House</h3>
-                <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.45;">Present your valid OLFU Student ID at the Campus Security Desk for handover.</p>
+            <div class="glass-panel" style="padding: 1.1rem 1.25rem; border-radius: 14px; border-top: 4px solid var(--olfu-green) !important;">
+                <div style="font-size: 1.5rem; margin-bottom: 0.3rem;">🏛️</div>
+                <h3 style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 0.2rem; font-weight: 700;">3. Claim at Guard House</h3>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.45;">Present your valid OLFU Student ID at the Campus Security Desk for handover.</p>
             </div>
         </div>
     </section>
@@ -806,13 +1149,11 @@ if ($is_admin) {
                         $display_name = preg_replace('/^\d+_/', '', pathinfo($filename, PATHINFO_FILENAME));
                         $display_name = ucwords(str_replace('_', ' ', $display_name));
 
-                        // Kunin ang eksaktong location mula sa JSON; kung wala pa, gamitin ang existing building array
                         $assigned_location = $items_data[$filename]['location'] ?? $sample_buildings[crc32($filename) % count($sample_buildings)];
                         $custody_status    = $items_data[$filename]['status'] ?? 'IN CUSTODY';
                         $report_type       = $items_data[$filename]['report_type'] ?? 'LOST';
                         $is_claimed        = ($custody_status === 'CLAIMED');
 
-                        // Set correct badge text and style
                         if ($is_claimed) {
                             $badge_text  = 'CLAIMED';
                             $badge_class = 'badge-claimed';
@@ -853,7 +1194,7 @@ if ($is_admin) {
         <?php else: ?>
             <!-- AUTHENTICATION GATEWAY PROMPT (WHEN LOGGED OUT) -->
             <section class="glass-panel auth-gate-box">
-                <div style="font-size: 3rem; margin-bottom: 0.8rem;">🔒</div>
+                <div style="font-size: 2.5rem; margin-bottom: 0.6rem;">🔒</div>
                 <h3 class="auth-gate-title">OLFU Account Required</h3>
                 <p class="auth-gate-text">To view detailed photos of lost items, inspect campus locations, and file recovery claims, please sign in using your official Our Lady of Fatima University account.</p>
                 <div class="auth-gate-actions">
@@ -864,12 +1205,48 @@ if ($is_admin) {
         <?php endif; ?>
     </main>
 
-    <!-- GREEN CAMPUS FOOTER -->
+    <!-- ENHANCED MULTI-COLUMN GREEN UNIVERSITY FOOTER -->
     <footer class="footer">
-        <div style="max-width: 1140px; margin: auto;">
-            <p style="font-weight: 700; color: #ffffff; margin-bottom: 0.4rem;">Our Lady of Fatima University - Antipolo Campus</p>
-            <p style="font-size: 0.88rem; color: #94a3b8; margin-bottom: 1.2rem;">Km 26 Sumulong Hwy, Antipolo, Rizal • Campus Security & Lost and Found</p>
-            <p style="font-size: 0.8rem; color: #64748b;">&copy; <?php echo date('Y'); ?> OLFU Antipolo Lost & Found Portal. All rights reserved.</p>
+        <div class="footer-container">
+            <!-- Column 1: Brand Info -->
+            <div class="footer-brand">
+                <div class="footer-brand-header">
+                    <img src="frontend/assets/images/OLFU LOGO.png" alt="OLFU Seal" class="footer-logo">
+                    <div>
+                        <h4>OLFU Antipolo</h4>
+                        <span style="font-size: 0.75rem; color: var(--olfu-gold); font-weight: 700;">Lost & Found Portal</span>
+                    </div>
+                </div>
+                <p>The official campus recovery platform designed to log, track, and return misplaced belongings to students and faculty across OLFU Antipolo facilities.</p>
+            </div>
+
+            <!-- Column 2: Quick Links (Triggers Modals) -->
+            <div>
+                <h5 class="footer-title">Portal Navigation</h5>
+                <ul class="footer-links">
+                    <li><a href="javascript:void(0)" onclick="openContactModal()">📞 Campus Help Desk</a></li>
+                    <li><a href="javascript:void(0)" onclick="openGuidelinesModal()">📋 Claiming Guidelines</a></li>
+                    <li><a href="javascript:void(0)" onclick="openBuildingsModal()">🗺️ Campus Map & Directory</a></li>
+                    <li><a href="backend/admin/dashboard.php">🛡️ Custodian Admin Portal</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Security Hours & Location -->
+            <div>
+                <h5 class="footer-title">Turnover & Claiming Desk</h5>
+                <div class="footer-info-box">
+                    <strong style="color: #ffffff;">📍 Main Security Desk (Gate 1)</strong><br>
+                    Km 26 Sumulong Hwy, Antipolo, Rizal<br><br>
+                    <strong style="color: #ffffff;">⏰ Operating Hours:</strong><br>
+                    Monday – Saturday: 7:00 AM – 7:00 PM
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom Legal / Copyright -->
+        <div class="footer-bottom">
+            <p>&copy; <?php echo date('Y'); ?> Our Lady of Fatima University - Antipolo Campus. All rights reserved.</p>
+            <p>Designed for OLFU Student Recovery Services</p>
         </div>
     </footer>
 
@@ -877,15 +1254,15 @@ if ($is_admin) {
     <div id="contactModal" class="modal">
         <div class="glass-panel modal-content">
             <span class="close-btn" onclick="closeContactModal()">&times;</span>
-            <h3 style="color: var(--olfu-green); font-size: 1.3rem; margin-bottom: 0.6rem;">📞 Campus Help Desk</h3>
-            <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5; margin-bottom: 1.2rem;">For immediate concerns regarding lost valuables (wallets, laptops, phones), reach out directly to campus units:</p>
-            <div style="display: flex; flex-direction: column; gap: 0.8rem; font-size: 0.88rem;">
-                <div style="background: var(--olfu-light); padding: 0.8rem; border-radius: 8px;">
+            <h3 style="color: var(--olfu-green); font-size: 1.2rem; margin-bottom: 0.6rem;">📞 Campus Help Desk</h3>
+            <p style="font-size: 0.85rem; color: #64748b; line-height: 1.5; margin-bottom: 1rem;">For immediate concerns regarding lost valuables (wallets, laptops, phones), reach out directly to campus units:</p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
+                <div style="background: var(--olfu-light); padding: 0.75rem; border-radius: 8px;">
                     <strong>🛡️ Main Guard Desk (Sumulong Gate):</strong><br>
                     Mon - Sat: 7:00 AM – 7:00 PM<br>
                     Location: Main Gate 1 Security Counter
                 </div>
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.8rem; border-radius: 8px;">
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 0.75rem; border-radius: 8px;">
                     <strong>🏛️ Office of Student Affairs (OSA):</strong><br>
                     Email: <span style="color: var(--olfu-green); font-weight: 600;">osa.antipolo@fatima.edu.ph</span>
                 </div>
@@ -897,8 +1274,8 @@ if ($is_admin) {
     <div id="guidelinesModal" class="modal">
         <div class="glass-panel modal-content">
             <span class="close-btn" onclick="closeGuidelinesModal()">&times;</span>
-            <h3 style="color: var(--olfu-green); font-size: 1.3rem; margin-bottom: 0.6rem;">📋 Claiming Guidelines</h3>
-            <ul style="padding-left: 1.2rem; font-size: 0.88rem; color: #475569; display: flex; flex-direction: column; gap: 0.6rem; line-height: 1.5;">
+            <h3 style="color: var(--olfu-green); font-size: 1.2rem; margin-bottom: 0.6rem;">📋 Claiming Guidelines</h3>
+            <ul style="padding-left: 1.2rem; font-size: 0.85rem; color: #475569; display: flex; flex-direction: column; gap: 0.5rem; line-height: 1.45;">
                 <li><strong>Valid ID Required:</strong> Always present your official OLFU Student ID or Faculty RFID card.</li>
                 <li><strong>Proof of Ownership:</strong> Be ready to unlock electronic devices or identify unique marks (stickers, case scratches, inside items).</li>
                 <li><strong>Turnover Period:</strong> Unclaimed items are securely logged and stored at the Security Desk for 60 days before institutional review.</li>
@@ -906,54 +1283,61 @@ if ($is_admin) {
         </div>
     </div>
 
-    <!-- 4. CAMPUS BUILDINGS MODAL -->
+    <!-- 4. CAMPUS BUILDINGS & MAP MODAL -->
     <div id="buildingsModal" class="modal">
         <div class="glass-panel modal-content">
             <span class="close-btn" onclick="closeBuildingsModal()">&times;</span>
-            <h3 style="color: var(--olfu-green); font-size: 1.3rem; margin-bottom: 0.6rem;">🏢 Antipolo Campus Buildings</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; font-size: 0.85rem; color: #334155;">
-                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>VMS:</strong> Vicente M. Santos Bldg</div>
-                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>JSB:</strong> Juliet Santos Bldg</div>
-                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SJBH:</strong> St. John the Baptist Hall</div>
-                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SCH:</strong> St. Catherine Hall</div>
-                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>SPCB:</strong> San Pedro Calungsod Bldg</div>
-                <div style="padding: 0.6rem; background: var(--olfu-light); border-radius: 6px;"><strong>ATH:</strong> Athletics & Gym Center</div>
+            <h3 style="color: var(--olfu-green); font-size: 1.2rem; margin-bottom: 0.8rem;">🗺️ Antipolo Campus Map & Directory</h3>
+            
+            <!-- OFFICIAL OLFU CAMPUS MAP DISPLAY -->
+            <div class="campus-map-wrapper" style="margin-bottom: 0.8rem;">
+                <img src="frontend/assets/images/OLFU Antipolo Campus Map.jpg" alt="OLFU Antipolo Campus Map" class="campus-map-img">
+            </div>
+
+            <!-- HELPFUL CAMPUS NOTE -->
+            <div style="background: var(--olfu-light); border: 1px solid #bbf7d0; padding: 0.85rem 1rem; border-radius: 10px; font-size: 0.82rem; color: #004428; line-height: 1.45;">
+                💡 <strong>Tip:</strong> All items recovered from any building listed above are logged and secured at the <strong>Main Security Desk (Gate 1)</strong>.
             </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT: DRAWER & MODAL TOGGLES -->
     <script>
+        // Open slide-out navigation menu
         function openSidebar() {
             document.getElementById('sidebarDrawer').classList.add('active');
             document.getElementById('sidebarOverlay').classList.add('active');
         }
 
+        // Close slide-out navigation menu
         function closeSidebar() {
             document.getElementById('sidebarDrawer').classList.remove('active');
             document.getElementById('sidebarOverlay').classList.remove('active');
         }
 
-        /* Support / Contact Modal */
+        // Open contact support modal dialog
         function openContactModal() {
             document.getElementById('contactModal').style.display = 'flex';
         }
+        // Close contact support modal dialog
         function closeContactModal() {
             document.getElementById('contactModal').style.display = 'none';
         }
 
-        /* Guidelines Modal */
+        // Open claiming guidelines modal dialog
         function openGuidelinesModal() {
             document.getElementById('guidelinesModal').style.display = 'flex';
         }
+        // Close claiming guidelines modal dialog
         function closeGuidelinesModal() {
             document.getElementById('guidelinesModal').style.display = 'none';
         }
 
-        /* Buildings Modal */
+        // Open campus buildings directory modal dialog
         function openBuildingsModal() {
             document.getElementById('buildingsModal').style.display = 'flex';
         }
+        // Close campus buildings directory modal dialog
         function closeBuildingsModal() {
             document.getElementById('buildingsModal').style.display = 'none';
         }
