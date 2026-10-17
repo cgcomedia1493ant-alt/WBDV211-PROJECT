@@ -1057,7 +1057,7 @@ $total_claims = count($claims_list);
                         $default_spots = [
                             'Vicente M. Santos Bldg (VMS)',
                             'Juliet Santos Bldg (JSB)',
-                            'San Juan Bautista Hall (SJBH)',
+                            'St. John the Baptist Hall (SJBH)',
                             'St. Catherine Hall (SCH)'
                         ];
 
@@ -1231,7 +1231,7 @@ $total_claims = count($claims_list);
                     <select name="building" onchange="toggleAdminCustomBuilding(this.value)" required>
                         <option value="Vicente M. Santos Bldg (VMS)">Vicente M. Santos Bldg (VMS)</option>
                         <option value="Juliet Santos Bldg (JSB)">Juliet Santos Bldg (JSB)</option>
-                        <option value="San Juan Bautista Hall (SJBH)">San Juan Bautista Hall (SJBH)</option>
+                        <option value="St. John the Baptist Hall (SJBH)">St. John the Baptist Hall (SJBH)</option>
                         <option value="St. Catherine Hall (SCH)">St. Catherine Hall (SCH)</option>
                         <option value="San Pedro Calungsod Bldg (SPCB)">San Pedro Calungsod Bldg (SPCB)</option>
                         <option value="Athletics & Gym Center">Athletics & Gym Center</option>
