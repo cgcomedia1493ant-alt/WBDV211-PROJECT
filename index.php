@@ -1,4 +1,10 @@
 <?php
+/**
+ * OLFU Antipolo Lost & Found Portal - Main Landing Page
+ * This file handles user sessions, authentication status verification, 
+ * renders the responsive UI, and displays the real-time campus belongings feed.
+ */
+
 // Start user session to verify authentication status
 session_start();
 
@@ -7,6 +13,7 @@ $is_admin = !empty($_SESSION['admin_logged_in']);
 $is_student = isset($_SESSION['user_id']) || isset($_SESSION['user_email']);
 $is_logged_in = $is_admin || $is_student;
 
+// Generate user display name and initials for the top navigation greeting chip
 if ($is_admin) {
     $user_display = 'Custodian';
     $first_name = 'Custodian';
@@ -40,6 +47,7 @@ if ($is_admin) {
     <style>
         /* ==========================================================================
            1. ROOT VARIABLES & GLOBAL RESET
+           Defines color themes (OLFU green, gold, status colors) and resets spacing.
            ========================================================================== */
         :root {
             --olfu-green: #005a36;
@@ -70,6 +78,7 @@ if ($is_admin) {
 
         /* ==========================================================================
            2. GLASSMORPHISM STYLES
+           Provides modern frosted glass visual effects for panels and badges.
            ========================================================================== */
         .glass-panel {
             background: rgba(255, 255, 255, 0.85) !important;
@@ -89,6 +98,7 @@ if ($is_admin) {
 
         /* ==========================================================================
            3. FIXED TOP NAVBAR & BRANDING
+           Sticky top navigation bar containing university logo, title, and actions.
            ========================================================================== */
         .navbar {
             background: linear-gradient(135deg, rgba(0, 90, 54, 0.98) 0%, rgba(0, 68, 40, 0.99) 100%);
@@ -196,7 +206,7 @@ if ($is_admin) {
             flex-shrink: 0;
         }
 
-        /* Clean & Sleek Single-Line User Greeting Chip */
+        /* Single-Line Clean User Greeting Chip */
         .user-greeting-chip {
             display: inline-flex;
             align-items: center;
@@ -257,41 +267,18 @@ if ($is_admin) {
         }
 
         @media screen and (min-width: 992px) {
-            .navbar {
-                padding: 1.1rem 0;
-            }
-
-            .logo-circle {
-                width: 56px;
-                height: 56px;
-                border-width: 2.5px;
-            }
-
-            .brand-logo {
-                width: 44px;
-                height: 44px;
-            }
-
-            .brand-title {
-                font-size: 1.85rem;
-            }
-
-            .brand-campus {
-                font-size: 0.85rem;
-                padding-left: 10px;
-            }
-
-            .brand-portal {
-                font-size: 0.88rem;
-            }
-
-            .burger-btn {
-                padding: 8px 10px;
-            }
+            .navbar { padding: 1.1rem 0; }
+            .logo-circle { width: 56px; height: 56px; border-width: 2.5px; }
+            .brand-logo { width: 44px; height: 44px; }
+            .brand-title { font-size: 1.85rem; }
+            .brand-campus { font-size: 0.85rem; padding-left: 10px; }
+            .brand-portal { font-size: 0.88rem; }
+            .burger-btn { padding: 8px 10px; }
         }
 
         /* ==========================================================================
            4. BURGER BUTTON & CLEAN SIDEBAR DRAWER
+           Slide-out menu drawer for navigation links, helpdesk, and admin portal.
            ========================================================================== */
         .burger-btn {
             background: rgba(255, 255, 255, 0.15);
@@ -327,9 +314,7 @@ if ($is_admin) {
             display: none;
         }
 
-        .sidebar-overlay.active {
-            display: block;
-        }
+        .sidebar-overlay.active { display: block; }
 
         .sidebar-drawer {
             position: fixed;
@@ -348,9 +333,7 @@ if ($is_admin) {
             padding: 1.5rem 1.25rem;
         }
 
-        .sidebar-drawer.active {
-            right: 0;
-        }
+        .sidebar-drawer.active { right: 0; }
 
         .sidebar-header {
             display: flex;
@@ -435,7 +418,8 @@ if ($is_admin) {
         }
 
         /* ==========================================================================
-           5. HERO BANNER WITH BALANCED VISIBLE OLFU BUILDING BACKGROUND
+           5. HERO BANNER SECTION
+           Hero landing header welcoming users with call-to-action buttons.
            ========================================================================== */
        .hero-section {
             background: linear-gradient(135deg, rgba(0, 90, 54, 0.82) 0%, rgba(0, 68, 40, 0.86) 100%),
@@ -506,9 +490,7 @@ if ($is_admin) {
             display: inline-block;
         }
 
-        .btn-hero-primary:hover {
-            transform: translateY(-2px);
-        }
+        .btn-hero-primary:hover { transform: translateY(-2px); }
 
         .btn-hero-secondary {
             background: rgba(255, 255, 255, 0.15);
@@ -523,7 +505,7 @@ if ($is_admin) {
             display: inline-block;
         }
 
-        /* 3-Step Row Responsive Layout */
+        /* 3-Step Process Cards Layout */
         .process-cards-section {
             max-width: 1140px;
             margin: -1.6rem auto 2.2rem;
@@ -540,7 +522,8 @@ if ($is_admin) {
         }
 
         /* ==========================================================================
-           6. FEED CONTAINER & GRID CARDS
+           6. FEED CONTAINER & ITEM CARDS GRID
+           Displays reported lost and found items in a responsive grid layout.
            ========================================================================== */
         .container {
             max-width: 1140px;
@@ -599,22 +582,9 @@ if ($is_admin) {
             z-index: 2;
         }
 
-        .badge-lost {
-            background: #fee2e2;
-            color: var(--lost-color);
-        }
-
-        .badge-found {
-            background: #dcfce7;
-            color: var(--found-color);
-            border: 1px solid #bbf7d0;
-        }
-
-        .badge-claimed {
-            background: #dcfce7;
-            color: var(--found-color);
-            border: 1px solid #bbf7d0;
-        }
+        .badge-lost { background: #fee2e2; color: var(--lost-color); }
+        .badge-found { background: #dcfce7; color: var(--found-color); border: 1px solid #bbf7d0; }
+        .badge-claimed { background: #dcfce7; color: var(--found-color); border: 1px solid #bbf7d0; }
 
         .card-img-wrapper {
             width: 100%;
@@ -682,11 +652,9 @@ if ($is_admin) {
             width: 100%;
         }
 
-        .btn-claim:hover {
-            background: var(--olfu-hover);
-        }
+        .btn-claim:hover { background: var(--olfu-hover); }
 
-        /* Authentication barrier locked card */
+        /* Authentication barrier locked card prompt */
         .auth-gate-box {
             text-align: center;
             padding: 2.5rem 1.25rem;
@@ -730,9 +698,7 @@ if ($is_admin) {
             transition: background 0.2s;
         }
 
-        .btn-auth-login:hover {
-            background: var(--olfu-hover);
-        }
+        .btn-auth-login:hover { background: var(--olfu-hover); }
 
         .btn-auth-register {
             background: #ffffff;
@@ -747,12 +713,11 @@ if ($is_admin) {
             transition: all 0.2s ease;
         }
 
-        .btn-auth-register:hover {
-            background: var(--olfu-light);
-        }
+        .btn-auth-register:hover { background: var(--olfu-light); }
 
         /* ==========================================================================
-           7. ENHANCED MULTI-COLUMN GREEN UNIVERSITY FOOTER STYLES
+           7. FOOTER STYLES
+           Multi-column university footer displaying contact info, hours, and navigation.
            ========================================================================== */
         .footer {
             background: #002b19;
@@ -861,7 +826,8 @@ if ($is_admin) {
         }
 
         /* ==========================================================================
-           8. MODALS STYLING
+           8. MODALS & INTERACTIVE CAMPUS MAP STYLES
+           Modal popup styling and smooth interactive draggable/zoomable map container.
            ========================================================================== */
         .modal {
             display: none;
@@ -879,7 +845,7 @@ if ($is_admin) {
             padding: 1.8rem 1.4rem;
             border-radius: 16px;
             width: 100%;
-            max-width: 580px;
+            max-width: 720px;
             position: relative;
             background: #ffffff;
             box-shadow: 0 20px 45px rgba(0, 0, 0, 0.2);
@@ -897,116 +863,76 @@ if ($is_admin) {
             transition: color 0.2s;
         }
 
-        .close-btn:hover {
-            color: var(--text-primary);
-        }
+        .close-btn:hover { color: var(--text-primary); }
 
-        /* Responsive Campus Map Container */
+        /* Interactive Draggable & Zoomable Campus Map Container */
         .campus-map-wrapper {
             width: 100%;
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             border: 1.5px solid #cbd5e1;
-            background: #f8fafc;
+            background: #ffffff; /* Clean white background */
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            position: relative;
+            cursor: zoom-in;
+            height: 360px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .campus-map-img {
-            width: 100%;
-            height: auto;
-            max-height: 320px;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
             display: block;
+            transition: transform 0.2s ease-out;
+            transform-origin: center center;
+            user-select: none;
+            pointer-events: auto;
+        }
+
+        .campus-map-wrapper.zoomed { cursor: grab; }
+        .campus-map-wrapper.zoomed:active { cursor: grabbing; }
+
+        .zoom-instruction {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
         }
 
         /* ==========================================================================
-           9. MOBILE MEDIA QUERIES (RESPONSIVE OVERRIDES)
+           9. MOBILE MEDIA QUERIES (RESPONSIVE BREAKPOINTS)
+           Adjusts layout grids and typography for smaller mobile screen sizes.
            ========================================================================== */
         @media screen and (max-width: 850px) {
-            .items-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-            }
+            .items-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
 
         @media screen and (max-width: 768px) {
-            .footer-container {
-                grid-template-columns: 1fr;
-                gap: 1.8rem;
-            }
-            
-            .footer-bottom {
-                flex-direction: column;
-                text-align: center;
-            }
+            .footer-container { grid-template-columns: 1fr; gap: 1.8rem; }
+            .footer-bottom { flex-direction: column; text-align: center; }
         }
 
         @media screen and (max-width: 650px) {
-            .hero-section {
-                padding-top: 5.5rem;
-            }
-
-            .brand-campus, .brand-portal {
-                display: none;
-            }
-
-            .brand-title {
-                font-size: 1.35rem;
-            }
-
-            .logo-circle {
-                width: 42px;
-                height: 42px;
-            }
-
-            .brand-logo {
-                width: 34px;
-                height: 34px;
-            }
-
-            .user-greeting-chip {
-                padding: 4px 10px 4px 5px;
-            }
-
-            .user-avatar-circle {
-                width: 24px;
-                height: 24px;
-                font-size: 0.68rem;
-            }
-
-            .user-name-title {
-                font-size: 0.8rem;
-            }
-
-            .hero-title {
-                font-size: 1.45rem;
-            }
-
-            .hero-subtitle {
-                font-size: 0.85rem;
-            }
-
-            .hero-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .btn-hero-primary, .btn-hero-secondary {
-                width: 100%;
-                text-align: center;
-            }
-
-            .process-cards-wrapper {
-                grid-template-columns: 1fr;
-            }
-
-            .process-cards-section {
-                margin-top: -1rem;
-            }
-
-            .items-grid {
-                grid-template-columns: 1fr !important;
-            }
+            .hero-section { padding-top: 5.5rem; }
+            .brand-campus, .brand-portal { display: none; }
+            .brand-title { font-size: 1.35rem; }
+            .logo-circle { width: 42px; height: 42px; }
+            .brand-logo { width: 34px; height: 34px; }
+            .user-greeting-chip { padding: 4px 10px 4px 5px; }
+            .user-avatar-circle { width: 24px; height: 24px; font-size: 0.68rem; }
+            .user-name-title { font-size: 0.8rem; }
+            .hero-title { font-size: 1.45rem; }
+            .hero-subtitle { font-size: 0.85rem; }
+            .hero-actions { flex-direction: column; width: 100%; }
+            .btn-hero-primary, .btn-hero-secondary { width: 100%; text-align: center; }
+            .process-cards-wrapper { grid-template-columns: 1fr; }
+            .process-cards-section { margin-top: -1rem; }
+            .items-grid { grid-template-columns: 1fr !important; }
         }
     </style>
 </head>
@@ -1079,7 +1005,7 @@ if ($is_admin) {
         </div>
     </aside>
 
-    <!-- HERO LANDING BANNER WITH BALANCED VISIBLE BUILDING BACKGROUND -->
+    <!-- HERO LANDING BANNER SECTION -->
     <section class="hero-section">
         <div class="hero-content">
             <span class="hero-badge glass-badge">OFFICIAL CAMPUS RECOVERY DESK</span>
@@ -1125,12 +1051,12 @@ if ($is_admin) {
             <!-- ITEMS GRID FEED (AUTHENTICATED ONLY) -->
             <section class="items-grid">
                 <?php
-                // Load persistent data from admin JSON
+                // Load persistent item metadata from admin JSON storage
                 $data_file = __DIR__ . '/backend/admin/item_data.json';
                 $items_data = file_exists($data_file) ? json_decode(file_get_contents($data_file), true) : [];
 
                 $upload_dir = 'uploads/';
-                // Exclude GIF format
+                // Scan uploaded images excluding GIF formats
                 $images = glob($upload_dir . '*.{jpg,jpeg,png,webp}', GLOB_BRACE);
 
                 if (!empty($images)):
@@ -1154,6 +1080,7 @@ if ($is_admin) {
                         $report_type       = $items_data[$filename]['report_type'] ?? 'LOST';
                         $is_claimed        = ($custody_status === 'CLAIMED');
 
+                        // Set appropriate badge status text and styling class
                         if ($is_claimed) {
                             $badge_text  = 'CLAIMED';
                             $badge_class = 'badge-claimed';
@@ -1250,7 +1177,7 @@ if ($is_admin) {
         </div>
     </footer>
 
-    <!-- 2. CONTACT US MODAL -->
+    <!-- MODAL POPUPS: CONTACT US -->
     <div id="contactModal" class="modal">
         <div class="glass-panel modal-content">
             <span class="close-btn" onclick="closeContactModal()">&times;</span>
@@ -1270,7 +1197,7 @@ if ($is_admin) {
         </div>
     </div>
 
-    <!-- 3. GUIDELINES MODAL -->
+    <!-- MODAL POPUPS: CLAIMING GUIDELINES -->
     <div id="guidelinesModal" class="modal">
         <div class="glass-panel modal-content">
             <span class="close-btn" onclick="closeGuidelinesModal()">&times;</span>
@@ -1283,15 +1210,16 @@ if ($is_admin) {
         </div>
     </div>
 
-    <!-- 4. CAMPUS BUILDINGS & MAP MODAL -->
+    <!-- MODAL POPUPS: CAMPUS MAP & DIRECTORY -->
     <div id="buildingsModal" class="modal">
         <div class="glass-panel modal-content">
             <span class="close-btn" onclick="closeBuildingsModal()">&times;</span>
-            <h3 style="color: var(--olfu-green); font-size: 1.2rem; margin-bottom: 0.8rem;">🗺️ Antipolo Campus Map & Directory</h3>
+            <h3 style="color: var(--olfu-green); font-size: 1.2rem; margin-bottom: 0.4rem;">🗺️ Antipolo Campus Map & Directory</h3>
+            <p class="zoom-instruction">🔍 Click the map to zoom in, then click and drag to pan across different areas.</p>
             
-            <!-- OFFICIAL OLFU CAMPUS MAP DISPLAY -->
-            <div class="campus-map-wrapper" style="margin-bottom: 0.8rem;">
-                <img src="frontend/assets/images/OLFU Antipolo Campus Map.jpg" alt="OLFU Antipolo Campus Map" class="campus-map-img">
+            <!-- INTERACTIVE DRAGGABLE & ZOOMABLE MAP CONTAINER -->
+            <div class="campus-map-wrapper" id="mapWrapper">
+                <img src="frontend/assets/images/OLFU Antipolo Campus Map.jpg" alt="OLFU Antipolo Campus Map" class="campus-map-img" id="mapImage">
             </div>
 
             <!-- HELPFUL CAMPUS NOTE -->
@@ -1301,46 +1229,146 @@ if ($is_admin) {
         </div>
     </div>
 
-    <!-- JAVASCRIPT: DRAWER & MODAL TOGGLES -->
+    <!-- JAVASCRIPT: UI CONTROLLERS & DRAGGABLE MAP ZOOM LOGIC -->
     <script>
-        // Open slide-out navigation menu
+        /**
+         * Opens the mobile slide-out navigation sidebar drawer.
+         */
         function openSidebar() {
             document.getElementById('sidebarDrawer').classList.add('active');
             document.getElementById('sidebarOverlay').classList.add('active');
         }
 
-        // Close slide-out navigation menu
+        /**
+         * Closes the mobile slide-out navigation sidebar drawer.
+         */
         function closeSidebar() {
             document.getElementById('sidebarDrawer').classList.remove('active');
             document.getElementById('sidebarOverlay').classList.remove('active');
         }
 
-        // Open contact support modal dialog
+        /**
+         * Opens the Contact Support modal dialog box.
+         */
         function openContactModal() {
             document.getElementById('contactModal').style.display = 'flex';
         }
-        // Close contact support modal dialog
+
+        /**
+         * Closes the Contact Support modal dialog box.
+         */
         function closeContactModal() {
             document.getElementById('contactModal').style.display = 'none';
         }
 
-        // Open claiming guidelines modal dialog
+        /**
+         * Opens the Claiming Guidelines modal dialog box.
+         */
         function openGuidelinesModal() {
             document.getElementById('guidelinesModal').style.display = 'flex';
         }
-        // Close claiming guidelines modal dialog
+
+        /**
+         * Closes the Claiming Guidelines modal dialog box.
+         */
         function closeGuidelinesModal() {
             document.getElementById('guidelinesModal').style.display = 'none';
         }
 
-        // Open campus buildings directory modal dialog
+        /**
+         * Opens the Campus Map & Buildings modal dialog box and resets view.
+         */
         function openBuildingsModal() {
             document.getElementById('buildingsModal').style.display = 'flex';
+            resetMapTransform();
         }
-        // Close campus buildings directory modal dialog
+
+        /**
+         * Closes the Campus Map & Buildings modal dialog box and resets map zoom/pan.
+         */
         function closeBuildingsModal() {
             document.getElementById('buildingsModal').style.display = 'none';
+            resetMapTransform();
         }
+
+        // ======================================================================
+        // INTERACTIVE CAMPUS MAP ZOOM & DRAG (PANNING) CONTROLLER
+        // ======================================================================
+        const mapWrapper = document.getElementById('mapWrapper');
+        const mapImage = document.getElementById('mapImage');
+
+        let isZoomed = false;
+        let scale = 1;
+        let pointX = 0;
+        let pointY = 0;
+        let startX = 0;
+        let startY = 0;
+        let isDragging = false;
+
+        /**
+         * Applies translation (pan coordinates) and scale (zoom level) to the map image.
+         */
+        function setTransform() {
+            mapImage.style.transform = `translate(${pointX}px, ${pointY}px) scale(${scale})`;
+        }
+
+        /**
+         * Resets the map image back to its default unzoomed state and centers position.
+         */
+        function resetMapTransform() {
+            isZoomed = false;
+            scale = 1;
+            pointX = 0;
+            pointY = 0;
+            mapWrapper.classList.remove('zoomed');
+            setTransform();
+        }
+
+        // Event Listener: Click to toggle zoom in or reset zoom
+        mapWrapper.addEventListener('click', function(e) {
+            // Prevent toggling zoom if the user was actively dragging/panning
+            if (isDragging) return;
+
+            if (!isZoomed) {
+                scale = 2.5; // Set zoom magnification level (2.5x)
+                isZoomed = true;
+                mapWrapper.classList.add('zoomed');
+            } else {
+                resetMapTransform();
+            }
+        });
+
+        // Event Listener: Mouse Dragging (Panning) across the map image when zoomed in
+        mapImage.addEventListener('mousedown', function(e) {
+            if (!isZoomed) return;
+            e.preventDefault();
+            isDragging = false;
+            startX = e.clientX - pointX;
+            startY = e.clientY - pointY;
+
+            /**
+             * Updates image position coordinates as the mouse moves.
+             */
+            function onMouseMove(e) {
+                isDragging = true;
+                pointX = e.clientX - startX;
+                pointY = e.clientY - startY;
+                setTransform();
+            }
+
+            /**
+             * Cleans up mouse movement listeners when mouse button is released.
+             */
+            function onMouseUp() {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+                // Slight delay to prevent immediate click toggle conflict after dragging
+                setTimeout(() => { isDragging = false; }, 50);
+            }
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        });
     </script>
 </body>
 </html>
