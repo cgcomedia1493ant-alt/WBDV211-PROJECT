@@ -1,5 +1,4 @@
 <?php
-// Start user session to handle authentication
 session_start();
 
 // Connect to MySQL database
@@ -9,45 +8,96 @@ $error_message = '';
 
 // Handle login submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = strtolower(trim($_POST['email'] ?? ''));
-    $password = trim($_POST['password'] ?? '');
 
-    // Validate presence and institutional domain match
+    $email = strtolower(trim($_POST['email'] ?? ''));
+    $password = $_POST['password'] ?? '';
+
+    // Validate required fields
     if (empty($email) || empty($password)) {
+
         $error_message = 'Please provide your institutional account and password.';
-    } elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@(student\.)?fatima\.edu\.ph$/', $email)) {
-        // Generic security notice without exposing domain pattern specifics
+
+    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+
         $error_message = 'Invalid institutional credentials. Please try again.';
+
+    } elseif (!preg_match('/^[a-zA-Z0-9._%+-]+@(student\.)?fatima\.edu\.ph$/', $email)) {
+
+        $error_message = 'Invalid institutional credentials. Please try again.';
+
     } else {
-        // Query user record securely from database
-        $stmt = $conn->prepare("SELECT id, fullname, email, password FROM users WHERE email = ?");
+
+        // Get user account from database
+        $stmt = $conn->prepare(
+            "SELECT id, fullname, email, password, status, role
+             FROM users
+             WHERE email = ?"
+        );
+
         $stmt->bind_param("s", $email);
         $stmt->execute();
-        $result = $stmt->get_result();
 
-        if ($user = $result->fetch_assoc()) {
-            // Verify encrypted password hash
-            if (password_verify($password, $user['password'])) {
-                // Populate session data for the portal
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+
+        if ($user && password_verify($password, $user['password'])) {
+
+            // Check if account is approved
+            // Remove this check if you do not use account approval.
+            if ($user['status'] === 'pending' ||
+                $user['status'] === 'rejected') {
+
+                $error_message = 'Your account is not approved yet.';
+
+            } else {
+
+                // Prevent session fixation
+                session_regenerate_id(true);
+
+                // Store session information
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_email'] = $user['email'];
-                $_SESSION['user_name'] = !empty($user['fullname']) ? $user['fullname'] : (strstr($user['email'], '@', true) ?: 'Student');
 
-                $stmt->close();
+                $_SESSION['user_name'] = !empty($user['fullname'])
+                    ? $user['fullname']
+                    : (strstr($user['email'], '@', true) ?: 'Student');
 
-                // Redirect back to main feed
-                header("Location: ../../index.php");
-                exit();
-            } else {
-                $error_message = 'Incorrect password. Please try again.';
+                // Save role, defaulting to user if unavailable
+                $_SESSION['role'] = $user['role'] ?? 'user';
+
+                // Set user status to active
+                $update = $conn->prepare(
+                    "UPDATE users SET status = 'active' WHERE id = ?"
+                );
+
+                $update->bind_param("i", $user['id']);
+                $update->execute();
+
+                if ($update->affected_rows < 0) {
+                    $error_message = 'Unable to update account status.';
+                    $update->close();
+                } else {
+                    $update->close();
+
+                    // Redirect admin and regular users
+                    if ($_SESSION['role'] === 'admin') {
+                        header("Location: ../../admin_dashboard.php");
+                    } else {
+                        header("Location: ../../index.php");
+                    }
+
+                    exit();
+                }
             }
+
         } else {
-            $error_message = 'No registered institutional account found with this email.';
+            $error_message = 'Invalid email or password. Please try again.';
         }
-        $stmt->close();
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
