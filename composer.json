@@ -1,0 +1,8 @@
+{
+    "require": {
+        "phpmailer/phpmailer": "^6.10"
+    },
+    "config": {
+        "preferred-install": "dist"
+    }
+}
